@@ -1,0 +1,41 @@
+<svg width="760" height="760" viewBox="132 132 760 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="120" y="120" width="784" height="784" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feOffset dy="10"></feOffset>
+      <feGaussianBlur stdDeviation="16"></feGaussianBlur>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.08 0 0 0 0 0.05 0 0 0 0 0.03 0 0 0 0.20 0"></feColorMatrix>
+      <feBlend in2="SourceGraphic" mode="normal"></feBlend>
+    </filter>
+    <linearGradient id="bgGrad" x1="164" y1="154" x2="860" y2="870" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3B2E24"></stop>
+      <stop offset="1" stop-color="#241A13"></stop>
+    </linearGradient>
+    <linearGradient id="paperGrad" x1="255" y1="255" x2="688" y2="791" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F6EBDC"></stop>
+      <stop offset="1" stop-color="#EADBC6"></stop>
+    </linearGradient>
+    <linearGradient id="foldGrad" x1="273" y1="474" x2="473" y2="674" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D8A96B"></stop>
+      <stop offset="1" stop-color="#B88345"></stop>
+    </linearGradient>
+    <linearGradient id="crease" x1="503" y1="265" x2="503" y2="753" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A67A49" stop-opacity="0.20"></stop>
+      <stop offset="0.15" stop-color="#7E5731" stop-opacity="0.10"></stop>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"></stop>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <rect x="132" y="132" width="760" height="760" rx="132" fill="url(#bgGrad)"></rect>
+
+    
+    <g transform="translate(-57 -31)">
+      <circle cx="652" cy="430" r="186" fill="url(#paperGrad)"></circle>
+      <rect x="300" y="492" width="230" height="350" rx="28" fill="url(#paperGrad)"></rect>
+      <path d="M300 492L530 492L530 244L300 492Z" fill="url(#paperGrad)"></path>
+      <path d="M300 492H513C534 492 545 516 530 531L300 760V492Z" fill="url(#foldGrad)"></path>
+      <path d="M530 244V764" stroke="url(#crease)" stroke-width="14"></path>
+      <path d="M300 492H513C536 492 549 517 533 533" stroke="#F9F0E5" stroke-width="8" stroke-linecap="round"></path>
+    </g>
+  </g>
+</svg>

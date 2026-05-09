@@ -1,0 +1,246 @@
+/* AccountMenu · spec §10.2 + §14.5 */
+
+.account-menu-anchor { position: relative; }
+
+.account-menu-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 240px;
+  max-width: 260px;
+  background: var(--paper-soft);
+  border: 0.5px solid var(--rule);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-2);
+  padding: 10px;
+  z-index: 50;
+  font-family: var(--font-serif);
+  color: var(--ink);
+  animation: fade-up 120ms ease-out;
+}
+
+.account-menu-label {
+  font-family: var(--font-mono);
+  font-size: var(--t-xxs);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  margin-bottom: 6px;
+}
+
+/* D10 globe-icon row — language deep-link entry, visible in both states */
+.account-menu-language-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  background: transparent;
+  border: 0.5px solid var(--rule-soft);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-family: var(--font-i18n-fallback);
+  font-size: var(--t-xs);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.account-menu-language-row:hover {
+  background: var(--paper);
+}
+.account-menu-language-label {
+  flex: 1;
+  text-align: left;
+  color: var(--ink);
+}
+.account-menu-language-current {
+  color: var(--ink-faded);
+  font-size: var(--t-xxs);
+}
+
+.account-menu-primary-cta {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  background: var(--walnut);
+  color: var(--paper-soft);
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: var(--t-xs);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-align: center;
+}
+
+.account-menu-byok-status {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--rule);
+  display: flex; align-items: center; gap: 6px;
+  font-size: var(--t-xs);
+  color: var(--ink-soft);
+}
+.account-menu-dot {
+  width: 5px; height: 5px;
+  border-radius: 3px;
+}
+
+.account-menu-user-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 0.5px solid var(--rule);
+}
+.account-menu-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--walnut-soft);
+  color: var(--paper-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+}
+.account-menu-user-meta { flex: 1; overflow: hidden; }
+.account-menu-email {
+  font-size: var(--t-xs);
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-menu-badge {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+.account-menu-badge-free  { background: var(--paper-deep); color: var(--ink-soft); }
+.account-menu-badge-sync  { background: var(--sky-soft, #D6E2EE); color: var(--sky); }
+.account-menu-badge-pro   { background: var(--forest-soft, #D6E5DC); color: var(--forest); }
+
+.account-menu-progress-block {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--paper-deep);
+  border-radius: var(--r-sm);
+  font-size: var(--t-xs);
+  color: var(--ink-soft);
+}
+.account-menu-progress-labels {
+  display: flex; justify-content: space-between;
+}
+.account-menu-progress-bar {
+  height: 3px;
+  background: var(--rule);
+  border-radius: 2px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+.account-menu-progress-fill {
+  height: 100%;
+  background: var(--walnut);
+}
+.account-menu-progress-bar-pro { background: var(--rule-soft); }
+.account-menu-progress-fill-pro { background: var(--forest); }
+
+.account-menu-hint {
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--paper-deep);
+  border-radius: var(--r-sm);
+  font-size: var(--t-xs);
+  color: var(--ink-soft);
+}
+
+.account-menu-restore {
+  display: block;
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: transparent;
+  color: var(--walnut);
+  font-size: var(--t-xs);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.account-menu-restore:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.account-menu-actions {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: var(--t-xs);
+  font-family: var(--font-sans);
+}
+.account-menu-actions a {
+  padding: 4px 0;
+  color: var(--ink-soft);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.account-menu-actions a:hover { color: var(--ink); }
+.account-menu-actions a:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.account-menu-upgrade { color: var(--forest) !important; }
+
+/* Switch-account confirm dialog */
+.account-menu-confirm-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(28, 26, 21, 0.32);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 101;
+  animation: fade-up 120ms ease-out;
+}
+.account-menu-confirm-panel {
+  width: 380px; max-width: 90vw;
+  background: var(--paper-soft);
+  border: 0.5px solid var(--rule);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-2);
+  padding: 20px 24px;
+  font-family: var(--font-serif);
+}
+.account-menu-confirm-body {
+  color: var(--ink);
+  font-size: var(--t-sm);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+.account-menu-confirm-actions {
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+.account-menu-confirm-cancel,
+.account-menu-confirm-primary {
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  font-size: var(--t-xs);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: 0.5px solid var(--rule);
+}
+.account-menu-confirm-cancel {
+  background: var(--paper);
+  color: var(--ink-soft);
+}
+.account-menu-confirm-primary {
+  background: var(--foxglove);
+  color: var(--paper-soft);
+  border-color: var(--foxglove);
+}

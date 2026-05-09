@@ -1,0 +1,22 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+.env.local
+.env.*.local
+.env.local.bak-*
+playwright-report/
+test-results/
+playwright/.cache/
+
+# Manual smoke temp Chrome profile dirs
+tests/manual/.tmp-*/
+
+# Release zip output (npm run release)
+paperflow-v*.zip
+
+# Chrome extension signing key — NEVER commit. Whoever has this can publish a
+# malicious update under the same extension ID.
+dist.pem
+# Packaged extension build artifact — regenerable via `npm run release`.
+dist.crx

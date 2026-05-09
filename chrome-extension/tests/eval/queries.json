@@ -1,0 +1,800 @@
+[
+  {
+    "queryId": "q-01-attention-self-attn",
+    "paperId": "p-attention-2017",
+    "scenario": "find-evidence",
+    "difficulty": "easy",
+    "query": "Read the abstract of this paper and tell me what 'self-attention' means in one sentence.",
+    "expectedTools": [
+      "readPaperSection"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: defines self-attention as a mechanism letting each position attend to all positions in the sequence and cites the abstract. 3: gives a vague definition without referencing the paper text. 1: hallucinates or omits self-attention entirely.",
+    "finalAnswerKeywords": [
+      "self-attention",
+      "transformer",
+      "sequence"
+    ]
+  },
+  {
+    "queryId": "q-02-bert-objective",
+    "paperId": "p-bert-2018",
+    "scenario": "find-evidence",
+    "difficulty": "easy",
+    "query": "What is the masked-language-modeling objective described in this paper's abstract?",
+    "expectedTools": [
+      "readPaperSection"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: states MLM masks random tokens and trains the model to predict them, enabling bidirectional context. 3: mentions masking but misses bidirectionality. 1: confuses with autoregressive LM or invents details.",
+    "finalAnswerKeywords": [
+      "masked",
+      "language model",
+      "bidirectional",
+      "BERT"
+    ]
+  },
+  {
+    "queryId": "q-03-gpt3-followups",
+    "paperId": "p-gpt3-2020",
+    "scenario": "find-evidence",
+    "difficulty": "mid",
+    "query": "Find 3 recent arxiv papers that build on this paper's few-shot prompting idea.",
+    "expectedTools": [
+      "readPaperSection",
+      "searchArxiv"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "sec0-p1"
+          }
+        }
+      },
+      {
+        "tool": "searchArxiv",
+        "argsContains": {
+          "query": {
+            "kind": "substring",
+            "value": "few-shot"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: lists 3 distinct arxiv papers with arxivId + one-sentence relation to few-shot prompting. 3: lists papers but no arxivId or weak relation. 1: hallucinates IDs or returns unrelated papers.",
+    "finalAnswerKeywords": [
+      "few-shot",
+      "prompting",
+      "arxiv",
+      "GPT"
+    ]
+  },
+  {
+    "queryId": "q-04-resnet-citation-count",
+    "paperId": "p-resnet-2015",
+    "scenario": "find-evidence",
+    "difficulty": "mid",
+    "query": "How many citations does this paper have on Semantic Scholar, and what is the venue?",
+    "expectedTools": [
+      "fetchSemanticScholar"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "fetchSemanticScholar",
+        "argsContains": {
+          "paperId": {
+            "kind": "exact",
+            "value": "1512.03385"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: reports concrete citation count (number) and venue (e.g. CVPR) sourced from Semantic Scholar. 3: gives one of the two. 1: invents numbers or refuses to answer.",
+    "finalAnswerKeywords": [
+      "citation",
+      "Semantic Scholar",
+      "ResNet"
+    ]
+  },
+  {
+    "queryId": "q-05-vit-vs-resnet",
+    "paperId": "p-vit-2020",
+    "scenario": "find-evidence",
+    "difficulty": "hard",
+    "query": "Read the abstract of this paper, then look up its citation count and find 2 follow-up arxiv papers comparing ViT to ResNet on ImageNet.",
+    "expectedTools": [
+      "readPaperSection",
+      "fetchSemanticScholar",
+      "searchArxiv"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      },
+      {
+        "tool": "fetchSemanticScholar",
+        "argsContains": {
+          "paperId": {
+            "kind": "exact",
+            "value": "2010.11929"
+          }
+        }
+      },
+      {
+        "tool": "searchArxiv",
+        "argsContains": {
+          "query": {
+            "kind": "substring",
+            "value": "vision transformer"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: ViT abstract summary + S2 citation count + 2 named arxiv follow-ups with IDs all present. 3: any 2 of 3 components present. 1: only 1 or hallucinated content.",
+    "finalAnswerKeywords": [
+      "ViT",
+      "ResNet",
+      "ImageNet",
+      "citation"
+    ]
+  },
+  {
+    "queryId": "q-06-flashattn-llm-impact",
+    "paperId": "p-flashattention-2022",
+    "scenario": "find-evidence",
+    "difficulty": "hard",
+    "query": "Summarize the IO-aware attention idea from this paper, find the citation count on Semantic Scholar, and search for 3 LLM systems papers that adopted FlashAttention.",
+    "expectedTools": [
+      "readPaperSection",
+      "fetchSemanticScholar",
+      "searchArxiv"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "sec0-p0"
+          }
+        }
+      },
+      {
+        "tool": "fetchSemanticScholar",
+        "argsContains": {
+          "paperId": {
+            "kind": "exact",
+            "value": "2205.14135"
+          }
+        }
+      },
+      {
+        "tool": "searchArxiv",
+        "argsContains": {
+          "query": {
+            "kind": "substring",
+            "value": "FlashAttention"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: describes IO-awareness (HBM vs SRAM block-tiling) + cites count + names 3 adopters with arxivIds. 3: 2 components. 1: only generic attention info.",
+    "finalAnswerKeywords": [
+      "FlashAttention",
+      "IO-aware",
+      "tiling",
+      "GPU"
+    ]
+  },
+  {
+    "queryId": "q-07-perelman-poincare-evidence",
+    "paperId": "p-perelman-poincare-2002",
+    "scenario": "find-evidence",
+    "difficulty": "hard",
+    "query": "What is the entropy formula introduced in this paper, and find 2 follow-up arxiv papers that verify or build on Perelman's Ricci flow program.",
+    "expectedTools": [
+      "readPaperSection",
+      "searchArxiv",
+      "fetchSemanticScholar"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "sec0-p0"
+          }
+        }
+      },
+      {
+        "tool": "searchArxiv",
+        "argsContains": {
+          "query": {
+            "kind": "substring",
+            "value": "Ricci flow"
+          }
+        }
+      },
+      {
+        "tool": "fetchSemanticScholar",
+        "argsContains": {
+          "paperId": {
+            "kind": "exact",
+            "value": "math/0211159"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: states the W-entropy / monotonicity formula + names 2 follow-up papers with arxivIds. 3: one of the two components. 1: vague math handwave with no concrete reference.",
+    "finalAnswerKeywords": [
+      "entropy",
+      "Ricci flow",
+      "Perelman",
+      "monotonicity"
+    ]
+  },
+  {
+    "queryId": "q-08-attention-canvas-summary",
+    "paperId": "p-attention-2017",
+    "scenario": "paint-canvas",
+    "difficulty": "easy",
+    "query": "Add a canvas node summarizing this paper's core contribution.",
+    "expectedTools": [
+      "readPaperSection",
+      "writeCanvas"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "sec0-p0"
+          }
+        }
+      },
+      {
+        "tool": "writeCanvas",
+        "argsContains": {
+          "nodeType": {
+            "kind": "exact",
+            "value": "paper"
+          },
+          "nodeTitle": {
+            "kind": "substring",
+            "value": "attention"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: confirms a canvas node was added with paper-type and a title naming attention/transformer. 3: node added but title generic. 1: no canvas write or wrong nodeType.",
+    "finalAnswerKeywords": [
+      "canvas",
+      "node",
+      "attention",
+      "transformer"
+    ]
+  },
+  {
+    "queryId": "q-09-word2vec-canvas-note",
+    "paperId": "p-word2vec-2013",
+    "scenario": "paint-canvas",
+    "difficulty": "easy",
+    "query": "Add a note-type canvas node titled 'CBOW vs Skip-gram' with a one-line definition.",
+    "expectedTools": [
+      "writeCanvas"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "writeCanvas",
+        "argsContains": {
+          "nodeType": {
+            "kind": "exact",
+            "value": "note"
+          },
+          "nodeTitle": {
+            "kind": "substring",
+            "value": "CBOW"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: canvas note added with nodeType='note' and a title mentioning CBOW or Skip-gram + correct definition (CBOW predicts center from context, Skip-gram opposite). 3: node added but definition swapped. 1: no node or wrong type.",
+    "finalAnswerKeywords": [
+      "CBOW",
+      "Skip-gram",
+      "canvas",
+      "note"
+    ]
+  },
+  {
+    "queryId": "q-10-llama-canvas-followups",
+    "paperId": "p-llama-2023",
+    "scenario": "paint-canvas",
+    "difficulty": "mid",
+    "query": "Search arxiv for 3 papers that extend LLaMA, then add each as a paper-type canvas node.",
+    "expectedTools": [
+      "searchArxiv",
+      "writeCanvas"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "searchArxiv",
+        "argsContains": {
+          "query": {
+            "kind": "substring",
+            "value": "LLaMA"
+          }
+        }
+      },
+      {
+        "tool": "writeCanvas",
+        "argsContains": {
+          "nodeType": {
+            "kind": "exact",
+            "value": "paper"
+          },
+          "nodeTitle": {
+            "kind": "substring",
+            "value": "LLaMA"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: 3 distinct paper-type canvas nodes added with LLaMA-related titles + arxivIds in body. 3: 2 nodes or missing arxivIds. 1: no canvas writes or unrelated content.",
+    "finalAnswerKeywords": [
+      "LLaMA",
+      "canvas",
+      "paper",
+      "arxiv"
+    ]
+  },
+  {
+    "queryId": "q-11-bert-canvas-sections",
+    "paperId": "p-bert-2018",
+    "scenario": "paint-canvas",
+    "difficulty": "mid",
+    "query": "Read the abstract and introduction of this paper, then create one section-type canvas node per major section discussed.",
+    "expectedTools": [
+      "readPaperSection",
+      "writeCanvas"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "sec1-p0"
+          }
+        }
+      },
+      {
+        "tool": "writeCanvas",
+        "argsContains": {
+          "nodeType": {
+            "kind": "exact",
+            "value": "section"
+          },
+          "nodeTitle": {
+            "kind": "substring",
+            "value": "BERT"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: ≥2 section-type canvas nodes added with BERT-relevant titles (e.g. pre-training, fine-tuning). 3: only 1 node or wrong type. 1: no canvas writes.",
+    "finalAnswerKeywords": [
+      "BERT",
+      "section",
+      "pre-training",
+      "canvas"
+    ]
+  },
+  {
+    "queryId": "q-12-clip-canvas-multimodal",
+    "paperId": "p-clip-2021",
+    "scenario": "paint-canvas",
+    "difficulty": "hard",
+    "query": "Read this paper's abstract, fetch its citation count, search for 2 follow-up multimodal papers, and add a canvas node for each finding (paper for follow-ups, note for the citation summary).",
+    "expectedTools": [
+      "readPaperSection",
+      "fetchSemanticScholar",
+      "searchArxiv",
+      "writeCanvas"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      },
+      {
+        "tool": "fetchSemanticScholar",
+        "argsContains": {
+          "paperId": {
+            "kind": "exact",
+            "value": "2103.00020"
+          }
+        }
+      },
+      {
+        "tool": "searchArxiv",
+        "argsContains": {
+          "query": {
+            "kind": "substring",
+            "value": "multimodal"
+          }
+        }
+      },
+      {
+        "tool": "writeCanvas",
+        "argsContains": {
+          "nodeType": {
+            "kind": "exact",
+            "value": "paper"
+          },
+          "nodeTitle": {
+            "kind": "substring",
+            "value": "CLIP"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: ≥3 canvas nodes added (2 paper-type follow-ups + 1 note-type with citation count) referencing CLIP and multimodal work. 3: 2 nodes total. 1: <2 or unrelated.",
+    "finalAnswerKeywords": [
+      "CLIP",
+      "multimodal",
+      "canvas",
+      "citation"
+    ]
+  },
+  {
+    "queryId": "q-13-diffusion-canvas-pipeline",
+    "paperId": "p-diffusion-2020",
+    "scenario": "paint-canvas",
+    "difficulty": "hard",
+    "query": "Build a small canvas: read this paper's abstract, search arxiv for 2 follow-up diffusion papers, and add one note explaining the forward/reverse process plus 2 paper nodes for the follow-ups.",
+    "expectedTools": [
+      "readPaperSection",
+      "searchArxiv",
+      "writeCanvas"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      },
+      {
+        "tool": "searchArxiv",
+        "argsContains": {
+          "query": {
+            "kind": "substring",
+            "value": "diffusion"
+          }
+        }
+      },
+      {
+        "tool": "writeCanvas",
+        "argsContains": {
+          "nodeType": {
+            "kind": "exact",
+            "value": "note"
+          },
+          "nodeTitle": {
+            "kind": "substring",
+            "value": "diffusion"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: 1 note-type canvas node explaining forward/reverse process + 2 paper-type nodes for follow-up diffusion papers, all with proper nodeType and titles. 3: 2 nodes only. 1: 0-1 or wrong types.",
+    "finalAnswerKeywords": [
+      "diffusion",
+      "canvas",
+      "forward",
+      "reverse"
+    ]
+  },
+  {
+    "queryId": "q-14-rlhf-canvas-history",
+    "paperId": "p-rlhf-2017",
+    "scenario": "paint-canvas",
+    "difficulty": "hard",
+    "query": "Read this paper's abstract, fetch its Semantic Scholar metadata, search arxiv for InstructGPT and Constitutional AI, then add a paper-type canvas node for each (3 nodes total).",
+    "expectedTools": [
+      "readPaperSection",
+      "fetchSemanticScholar",
+      "searchArxiv",
+      "writeCanvas"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      },
+      {
+        "tool": "fetchSemanticScholar",
+        "argsContains": {
+          "paperId": {
+            "kind": "exact",
+            "value": "1706.03741"
+          }
+        }
+      },
+      {
+        "tool": "searchArxiv",
+        "argsContains": {
+          "query": {
+            "kind": "substring",
+            "value": "RLHF"
+          }
+        }
+      },
+      {
+        "tool": "writeCanvas",
+        "argsContains": {
+          "nodeType": {
+            "kind": "exact",
+            "value": "paper"
+          },
+          "nodeTitle": {
+            "kind": "substring",
+            "value": "RLHF"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: 3 paper-type canvas nodes (this paper + InstructGPT + Constitutional AI) all with arxivId in body. 3: 2 nodes. 1: 0-1 nodes or hallucinated arxivIds.",
+    "finalAnswerKeywords": [
+      "RLHF",
+      "InstructGPT",
+      "Constitutional",
+      "canvas"
+    ]
+  },
+  {
+    "queryId": "q-15-attention-screenshot-abstract",
+    "paperId": "p-attention-2017",
+    "scenario": "organize-library",
+    "difficulty": "easy",
+    "query": "Take a screenshot of the abstract paragraph for my library.",
+    "expectedTools": [
+      "screenshotParagraph"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "screenshotParagraph",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: confirms screenshot captured at sec0-p0 of this paper and returns/links the data URL. 3: screenshot taken but wrong paragraph. 1: no screenshot call.",
+    "finalAnswerKeywords": [
+      "screenshot",
+      "abstract",
+      "attention"
+    ]
+  },
+  {
+    "queryId": "q-16-tabpfn-screenshot-claim",
+    "paperId": "p-tabpfn-2022",
+    "scenario": "organize-library",
+    "difficulty": "easy",
+    "query": "Capture the abstract of this paper as an image so I can save it to my reading library.",
+    "expectedTools": [
+      "screenshotParagraph"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "screenshotParagraph",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: screenshot of sec0-p0 captured + brief note that it shows TabPFN's tabular-classification claim. 3: screenshot only, no description. 1: no screenshot call.",
+    "finalAnswerKeywords": [
+      "screenshot",
+      "TabPFN",
+      "tabular"
+    ]
+  },
+  {
+    "queryId": "q-17-higgs-screenshot-result",
+    "paperId": "p-higgs-atlas-2012",
+    "scenario": "organize-library",
+    "difficulty": "easy",
+    "query": "Take a screenshot of the abstract showing the 125 GeV result for archival.",
+    "expectedTools": [
+      "screenshotParagraph"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "screenshotParagraph",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: screenshot of sec0-p0 confirmed and notes 125 GeV / Higgs observation. 3: screenshot but no GeV mention. 1: no screenshot call.",
+    "finalAnswerKeywords": [
+      "screenshot",
+      "Higgs",
+      "125 GeV",
+      "ATLAS"
+    ]
+  },
+  {
+    "queryId": "q-18-conformal-screenshot-and-read",
+    "paperId": "p-conformal-2021",
+    "scenario": "organize-library",
+    "difficulty": "mid",
+    "query": "Read the abstract paragraph and also take a screenshot of it for my library.",
+    "expectedTools": [
+      "readPaperSection",
+      "screenshotParagraph"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "readPaperSection",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      },
+      {
+        "tool": "screenshotParagraph",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: text summary of conformal prediction's distribution-free coverage guarantee + confirmation of screenshot. 3: only one of the two. 1: neither.",
+    "finalAnswerKeywords": [
+      "conformal",
+      "prediction",
+      "screenshot",
+      "coverage"
+    ]
+  },
+  {
+    "queryId": "q-19-ligo-screenshot-canvas",
+    "paperId": "p-ligo-gw150914-2016",
+    "scenario": "organize-library",
+    "difficulty": "mid",
+    "query": "Screenshot the abstract of this paper and add a canvas note linking to that screenshot.",
+    "expectedTools": [
+      "screenshotParagraph",
+      "writeCanvas"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "screenshotParagraph",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      },
+      {
+        "tool": "writeCanvas",
+        "argsContains": {
+          "nodeType": {
+            "kind": "exact",
+            "value": "note"
+          },
+          "nodeTitle": {
+            "kind": "substring",
+            "value": "GW150914"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: screenshot taken at sec0-p0 + a note-type canvas node titled with GW150914 referencing the screenshot. 3: only one of the two. 1: neither.",
+    "finalAnswerKeywords": [
+      "GW150914",
+      "LIGO",
+      "screenshot",
+      "canvas"
+    ]
+  },
+  {
+    "queryId": "q-20-greentao-screenshot-citations",
+    "paperId": "p-green-tao-2004",
+    "scenario": "organize-library",
+    "difficulty": "mid",
+    "query": "Take a screenshot of the abstract of this paper and look up its citation count on Semantic Scholar.",
+    "expectedTools": [
+      "screenshotParagraph",
+      "fetchSemanticScholar"
+    ],
+    "expectedToolArgs": [
+      {
+        "tool": "screenshotParagraph",
+        "argsContains": {
+          "paragraphId": {
+            "kind": "exact",
+            "value": "abs"
+          }
+        }
+      },
+      {
+        "tool": "fetchSemanticScholar",
+        "argsContains": {
+          "paperId": {
+            "kind": "exact",
+            "value": "math/0404188"
+          }
+        }
+      }
+    ],
+    "finalAnswerRubric": "5: screenshot at sec0-p0 confirmed + concrete citation count from Semantic Scholar for the Green-Tao theorem paper. 3: only one of the two. 1: neither.",
+    "finalAnswerKeywords": [
+      "Green-Tao",
+      "screenshot",
+      "citation",
+      "primes"
+    ]
+  }
+]

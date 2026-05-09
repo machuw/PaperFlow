@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PaperFlow — read papers like a researcher, not a tab hoarder</title>
+<link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F1E6;
+  --paper-deep:#EFE8D7;
+  --paper-soft:#FBF7EC;
+  --paper-edge:#E4DBC4;
+  --ink:#1C1A15;
+  --ink-soft:#3A3428;
+  --ink-faded:#6B6152;
+  --ink-ghost:#A59B86;
+  --rule:#CDC3A8;
+  --rule-soft:#E0D7BF;
+  --walnut:#8B6B3E;
+  --walnut-soft:#B5935F;
+  --walnut-deep:#6B4F26;
+  --ink-highlight:#E8D385;
+  --foxglove:#A34B5E;
+  --forest:#4F6B4A;
+  --sky:#4C6A87;
+  --font-serif:'Newsreader','Iowan Old Style',Georgia,serif;
+  --font-sans:'Inter Tight',-apple-system,'SF Pro Text',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono','SF Mono',Menlo,monospace;
+  --shadow-1:0 1px 2px rgba(60,48,24,.06),0 0 0 .5px rgba(60,48,24,.08);
+  --shadow-2:0 8px 24px -8px rgba(60,48,24,.18),0 0 0 .5px rgba(60,48,24,.1);
+  --shadow-3:0 24px 48px -12px rgba(40,30,12,.28),0 0 0 .5px rgba(60,48,24,.14);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--font-sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-feature-settings:'ss01','cv11'}
+body{position:relative;overflow-x:hidden}
+::selection{background:color-mix(in oklch, var(--ink-highlight) 60%, transparent);color:var(--ink)}
+
+/* paper grain */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.4'/></svg>");
+  opacity:.07;mix-blend-mode:multiply;
+}
+
+a{color:var(--walnut);text-decoration:none}
+a:hover{text-decoration:underline;text-decoration-thickness:.5px;text-underline-offset:3px}
+
+/* ---------- layout ---------- */
+.container{max-width:1200px;margin:0 auto;padding:0 32px;position:relative;z-index:2}
+@media (max-width:720px){.container{padding:0 20px}}
+
+/* ---------- nav ---------- */
+.nav{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in oklch, var(--paper) 92%, transparent);
+  backdrop-filter:blur(8px);
+  border-bottom:.5px solid var(--rule);
+}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em}
+.brand img{width:24px;height:24px;display:block}
+.brand .ver{font-family:var(--font-mono);font-size:11px;color:var(--ink-faded);font-weight:500;background:var(--paper-deep);padding:1px 6px;border-radius:3px;border:.5px solid var(--rule-soft)}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{color:var(--ink-soft);font-size:14px;font-weight:500}
+.nav-links a:hover{color:var(--ink);text-decoration:none}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:6px;font-weight:600;font-size:14px;
+  border:.5px solid transparent;cursor:pointer;transition:transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
+  text-decoration:none !important;
+  font-family:inherit;
+}
+.btn-primary{background:var(--ink);color:var(--paper-soft);box-shadow:var(--shadow-1)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:var(--shadow-2)}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+.btn-ghost:hover{background:var(--paper-deep)}
+@media (max-width:720px){.nav-links{display:none}}
+
+/* ---------- hero ---------- */
+.hero{padding:80px 0 48px;position:relative}
+.hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:64px;align-items:center}
+@media (max-width:980px){.hero-grid{grid-template-columns:1fr;gap:48px}}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-mono);font-size:11px;font-weight:500;
+  color:var(--walnut-deep);
+  text-transform:uppercase;letter-spacing:.14em;
+  padding:5px 10px;border-radius:99px;background:var(--paper-deep);border:.5px solid var(--rule);
+  margin-bottom:24px;
+}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--forest)}
+
+.hero h1{
+  font-family:var(--font-serif);font-weight:500;
+  font-size:clamp(40px,5.6vw,68px);line-height:1.04;letter-spacing:-.02em;
+  margin:0 0 24px;color:var(--ink);
+  text-wrap:balance;
+}
+.hero h1 .ital{font-style:italic;font-weight:400;color:var(--walnut-deep)}
+.hero h1 .hl{
+  background:linear-gradient(180deg, transparent 62%, color-mix(in oklch, var(--ink-highlight) 75%, transparent) 62%, color-mix(in oklch, var(--ink-highlight) 75%, transparent) 92%, transparent 92%);
+  padding:0 4px;margin:0 -4px;
+}
+.hero p.lede{
+  font-family:var(--font-serif);font-size:20px;line-height:1.5;color:var(--ink-soft);
+  margin:0 0 32px;max-width:540px;
+}
+.cta-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.cta-meta{display:flex;align-items:center;gap:10px;color:var(--ink-faded);font-size:13px;margin-top:18px}
+.cta-meta .pip{width:5px;height:5px;border-radius:50%;background:var(--ink-ghost)}
+
+/* hero preview frame */
+.preview{
+  background:var(--paper-soft);
+  border:.5px solid var(--rule);
+  border-radius:10px;
+  box-shadow:var(--shadow-3);
+  overflow:hidden;
+  position:relative;
+  transform:rotate(-.4deg);
+  transition:transform 600ms cubic-bezier(.2,.8,.2,1);
+}
+.preview:hover{transform:rotate(0)}
+.preview-bar{
+  height:34px;background:var(--paper);border-bottom:.5px solid var(--rule);
+  display:flex;align-items:center;padding:0 12px;gap:8px;
+}
+.preview-bar .dots{display:flex;gap:6px}
+.preview-bar .dot{width:9px;height:9px;border-radius:50%;background:var(--rule)}
+.preview-bar .url{
+  flex:1;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--ink-faded);
+  background:var(--paper-deep);border:.5px solid var(--rule-soft);border-radius:4px;
+  padding:3px 10px;margin:0 28px;letter-spacing:.02em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.preview-app{display:grid;grid-template-columns:1fr 280px;min-height:420px}
+@media (max-width:560px){.preview-app{grid-template-columns:1fr}.preview-app .chat-pane{display:none}}
+.paper-pane{padding:22px 24px;border-right:.5px solid var(--rule);background:var(--paper-soft)}
+.paper-pane .paper-meta{font-family:var(--font-mono);font-size:10px;color:var(--ink-faded);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.paper-pane h3{font-family:var(--font-serif);font-weight:600;font-size:20px;line-height:1.25;letter-spacing:-.005em;margin:0 0 4px;color:var(--ink)}
+.paper-pane .authors{font-family:var(--font-serif);font-style:italic;font-size:13px;color:var(--ink-faded);margin-bottom:14px}
+.paper-pane .body{font-family:var(--font-serif);font-size:13.5px;line-height:1.65;color:var(--ink-soft)}
+.paper-pane .body p{margin:0 0 10px}
+.paper-pane .body .yel{background:color-mix(in oklch, var(--ink-highlight) 55%, transparent);padding:0 2px;border-radius:1px}
+.paper-pane .body .red{background:color-mix(in oklch, var(--foxglove) 22%, transparent);padding:0 2px;border-radius:1px}
+.paper-pane .body sup{color:var(--walnut);font-weight:600;cursor:pointer;font-size:.78em}
+.paper-pane .eqn{
+  font-family:var(--font-serif);font-style:italic;font-size:14px;
+  text-align:center;margin:14px 0;color:var(--ink);
+}
+.paper-pane .eqn-tag{font-family:var(--font-serif);font-style:normal;color:var(--ink-faded);margin-left:18px}
+
+.chat-pane{display:flex;flex-direction:column;background:var(--paper)}
+.chat-tabs{display:flex;border-bottom:.5px solid var(--rule);font-size:11px;font-weight:500;color:var(--ink-faded);padding:0 8px}
+.chat-tabs span{padding:8px 10px;border-bottom:1.5px solid transparent;cursor:default}
+.chat-tabs span.act{color:var(--ink);border-bottom-color:var(--walnut)}
+.chat-msgs{flex:1;padding:14px 14px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.msg{font-size:12.5px;line-height:1.55}
+.msg .who{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faded);margin-bottom:4px}
+.msg.user .bubble{background:var(--paper-deep);border:.5px solid var(--rule-soft);padding:8px 10px;border-radius:6px;color:var(--ink)}
+.msg.ai .bubble{font-family:var(--font-serif);font-size:13.5px;line-height:1.55;color:var(--ink-soft)}
+.msg.ai .bubble sup{color:var(--walnut);font-weight:600;font-size:.78em;margin-left:1px}
+.chat-input{
+  margin:10px;border:.5px solid var(--rule);border-radius:6px;padding:8px 10px;
+  background:var(--paper-soft);font-size:12px;color:var(--ink-ghost);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.chat-input .kbd{font-family:var(--font-mono);font-size:10px;background:var(--paper-deep);border:.5px solid var(--rule-soft);padding:1px 5px;border-radius:3px;color:var(--ink-faded)}
+
+/* margin annotation */
+.margin-note{
+  position:absolute;top:140px;right:-48px;width:160px;
+  font-family:var(--font-serif);font-style:italic;font-size:12px;line-height:1.4;color:var(--foxglove);
+  padding:8px 10px;
+  background:color-mix(in oklch, var(--paper-soft) 85%, transparent);
+  border-left:1.5px solid var(--foxglove);
+  transform:rotate(1.5deg);
+  display:none;
+}
+@media (min-width:1100px){.margin-note{display:block}}
+
+/* ---------- marquee ---------- */
+.trust{
+  border-top:.5px solid var(--rule);border-bottom:.5px solid var(--rule);
+  padding:22px 0;margin-top:24px;background:var(--paper-deep);
+}
+.trust-inner{
+  display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap;
+  font-family:var(--font-mono);font-size:11px;color:var(--ink-faded);letter-spacing:.08em;text-transform:uppercase;
+}
+.trust-inner span{display:inline-flex;align-items:center;gap:8px}
+.trust-inner span::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--walnut-soft)}
+
+/* ---------- section base ---------- */
+section.s{padding:96px 0;position:relative}
+.section-eyebrow{
+  font-family:var(--font-mono);font-size:11px;font-weight:500;
+  color:var(--walnut-deep);text-transform:uppercase;letter-spacing:.14em;
+  margin-bottom:14px;display:flex;align-items:center;gap:10px;
+}
+.section-eyebrow::before{content:'';display:block;width:18px;height:1px;background:var(--walnut)}
+.section h2{
+  font-family:var(--font-serif);font-weight:500;font-size:clamp(32px,4vw,46px);
+  line-height:1.1;letter-spacing:-.015em;margin:0 0 18px;color:var(--ink);text-wrap:balance;
+}
+.section h2 .ital{font-style:italic;color:var(--walnut-deep);font-weight:400}
+.section .lede{font-family:var(--font-serif);font-size:18px;line-height:1.55;color:var(--ink-soft);max-width:640px;margin:0 0 48px}
+
+/* ---------- problem strip ---------- */
+.problem{background:var(--paper-deep);border-top:.5px solid var(--rule);border-bottom:.5px solid var(--rule)}
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:48px}
+@media (max-width:820px){.problem-grid{grid-template-columns:1fr;gap:28px}}
+.problem-item{font-family:var(--font-serif)}
+.problem-item .num{font-family:var(--font-mono);font-size:11px;color:var(--ink-ghost);letter-spacing:.1em;margin-bottom:8px}
+.problem-item h4{font-size:22px;font-weight:600;margin:0 0 8px;color:var(--ink);line-height:1.25;letter-spacing:-.005em}
+.problem-item p{font-size:15px;line-height:1.55;color:var(--ink-faded);margin:0}
+
+/* ---------- features grid ---------- */
+.features{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
+.feature{
+  grid-column:span 4;
+  background:var(--paper-soft);border:.5px solid var(--rule);border-radius:10px;
+  padding:28px 26px 26px;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;gap:14px;min-height:280px;
+}
+.feature.wide{grid-column:span 6}
+.feature.tall{grid-column:span 6}
+.feature.hero-card{grid-column:span 12;min-height:auto;padding:0;background:var(--paper)}
+@media (max-width:980px){.feature,.feature.wide,.feature.tall{grid-column:span 12}}
+
+.feature .num{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;color:var(--ink-ghost);text-transform:uppercase}
+.feature h3{font-family:var(--font-serif);font-weight:600;font-size:24px;line-height:1.2;margin:0;letter-spacing:-.005em;color:var(--ink)}
+.feature p{font-family:var(--font-serif);font-size:14.5px;line-height:1.55;color:var(--ink-faded);margin:0}
+.feature .vis{margin-top:auto;padding-top:14px}
+
+/* visualizations inside feature cards */
+.vis-chat{
+  border:.5px solid var(--rule-soft);border-radius:8px;background:var(--paper);
+  padding:12px;font-size:12px;
+}
+.vis-chat .row{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
+.vis-chat .row:last-child{margin-bottom:0}
+.vis-chat .av{
+  width:18px;height:18px;border-radius:4px;flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.04em;
+}
+.vis-chat .av.u{background:var(--paper-deep);color:var(--ink-soft);border:.5px solid var(--rule-soft)}
+.vis-chat .av.a{background:var(--ink);color:var(--paper-soft)}
+.vis-chat .txt{flex:1;font-family:var(--font-serif);font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
+.vis-chat .txt sup{color:var(--walnut);font-weight:600}
+
+.vis-graph{
+  border:.5px solid var(--rule-soft);border-radius:8px;background:
+    radial-gradient(circle, var(--rule-soft) .8px, transparent .9px) 0 0/14px 14px,
+    var(--paper);
+  height:180px;position:relative;overflow:hidden;
+}
+
+.vis-cite{
+  font-family:var(--font-serif);font-size:13.5px;line-height:1.6;color:var(--ink-soft);
+  border:.5px solid var(--rule-soft);border-radius:8px;background:var(--paper);
+  padding:14px;
+}
+.vis-cite sup{color:var(--walnut);font-weight:600}
+.vis-cite .pop{
+  margin-top:10px;border-top:.5px dashed var(--rule);padding-top:10px;
+  font-size:12px;font-family:var(--font-sans);color:var(--ink-faded);
+}
+.vis-cite .pop .name{font-family:var(--font-serif);font-style:italic;color:var(--ink);font-size:13px;display:block;margin-bottom:2px}
+
+.vis-models{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font-family:var(--font-mono);font-size:10.5px;font-weight:500;
+  border:.5px solid var(--rule);border-radius:99px;padding:4px 9px;color:var(--ink-soft);
+  background:var(--paper);
+  display:inline-flex;align-items:center;gap:6px;
+}
+.chip .dt{width:5px;height:5px;border-radius:50%;background:var(--forest)}
+.chip.byok .dt{background:var(--walnut)}
+.chip.local .dt{background:var(--sky)}
+
+.vis-overview{
+  border:.5px solid var(--rule-soft);border-radius:8px;background:var(--paper);
+  padding:14px 16px;font-family:var(--font-serif);
+}
+.vis-overview h5{font-size:11px;font-family:var(--font-mono);font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faded);margin:0 0 8px}
+.vis-overview ul{list-style:none;margin:0;padding:0;font-size:13px;line-height:1.55;color:var(--ink-soft)}
+.vis-overview li{padding-left:14px;position:relative;margin-bottom:5px}
+.vis-overview li::before{content:'';position:absolute;left:0;top:.65em;width:6px;height:1px;background:var(--walnut)}
+
+.vis-keywords{display:flex;flex-wrap:wrap;gap:6px}
+.vis-keywords .kw{font-family:var(--font-serif);font-size:13px;padding:3px 9px;background:var(--paper-deep);border:.5px solid var(--rule-soft);border-radius:99px;color:var(--ink-soft)}
+
+/* hero feature card (split) */
+.hero-card-grid{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
+@media (max-width:820px){.hero-card-grid{grid-template-columns:1fr}}
+.hero-card-text{padding:36px 36px 36px 36px;display:flex;flex-direction:column;justify-content:center;border-right:.5px solid var(--rule)}
+@media (max-width:820px){.hero-card-text{border-right:0;border-bottom:.5px solid var(--rule)}}
+.hero-card-vis{padding:36px;background:var(--paper-soft);position:relative}
+
+/* ---------- how-it-works ---------- */
+.how{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:.5px solid var(--rule);border-bottom:.5px solid var(--rule)}
+@media (max-width:820px){.how{grid-template-columns:1fr;}}
+.step{padding:32px 28px;border-right:.5px solid var(--rule);position:relative}
+.step:last-child{border-right:0}
+@media (max-width:820px){.step{border-right:0;border-bottom:.5px solid var(--rule)}.step:last-child{border-bottom:0}}
+.step .n{font-family:var(--font-serif);font-style:italic;font-size:48px;line-height:1;color:var(--walnut);margin-bottom:14px;font-weight:400}
+.step h4{font-family:var(--font-serif);font-size:20px;font-weight:600;line-height:1.25;margin:0 0 8px;color:var(--ink)}
+.step p{font-family:var(--font-serif);font-size:14px;line-height:1.55;color:var(--ink-faded);margin:0}
+
+/* ---------- privacy / byok callout ---------- */
+.byok{
+  background:var(--ink);color:var(--paper-soft);border-radius:14px;padding:48px;
+  display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:center;
+  position:relative;overflow:hidden;
+}
+@media (max-width:820px){.byok{grid-template-columns:1fr;padding:36px 28px}}
+.byok::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(60% 80% at 100% 0%, color-mix(in oklch, var(--walnut) 25%, transparent), transparent 60%);
+}
+.byok .eyebrow{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:var(--walnut-soft)}
+.byok h2{font-family:var(--font-serif);font-weight:500;font-size:clamp(28px,3.4vw,40px);line-height:1.1;letter-spacing:-.01em;margin:0 0 18px;color:var(--paper-soft)}
+.byok h2 .ital{font-style:italic;color:var(--walnut-soft);font-weight:400}
+.byok p{font-family:var(--font-serif);font-size:17px;line-height:1.55;color:color-mix(in oklch, var(--paper-soft) 80%, transparent);margin:0 0 24px;max-width:480px}
+.byok .specs{display:flex;flex-direction:column;gap:14px;font-family:var(--font-mono);font-size:12px;position:relative;z-index:1}
+.byok .spec-row{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;background:rgba(255,255,255,.04);border:.5px solid rgba(255,255,255,.1);border-radius:8px}
+.byok .spec-row .k{color:var(--walnut-soft);min-width:78px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding-top:1px}
+.byok .spec-row .v{color:var(--paper-soft);font-family:var(--font-sans);font-size:13.5px;line-height:1.5}
+
+/* ---------- testimonial ---------- */
+.quote{
+  border-top:.5px solid var(--rule);border-bottom:.5px solid var(--rule);
+  padding:80px 0;text-align:center;background:var(--paper-deep);
+}
+.quote blockquote{
+  font-family:var(--font-serif);font-style:italic;font-weight:400;
+  font-size:clamp(22px,2.6vw,32px);line-height:1.35;letter-spacing:-.005em;
+  color:var(--ink);max-width:840px;margin:0 auto 22px;text-wrap:balance;
+}
+.quote blockquote::before,.quote blockquote::after{color:var(--walnut);font-weight:600}
+.quote blockquote::before{content:'“';margin-right:4px}
+.quote blockquote::after{content:'”';margin-left:4px}
+.quote .by{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faded)}
+.quote .by .name{color:var(--ink);font-weight:600}
+
+/* ---------- final cta ---------- */
+.final-cta{padding:120px 0;text-align:center}
+.final-cta h2{font-family:var(--font-serif);font-weight:500;font-size:clamp(40px,5vw,64px);line-height:1.05;letter-spacing:-.02em;margin:0 0 20px;color:var(--ink);text-wrap:balance}
+.final-cta h2 .ital{font-style:italic;color:var(--walnut-deep);font-weight:400}
+.final-cta p{font-family:var(--font-serif);font-size:19px;color:var(--ink-soft);margin:0 0 32px}
+
+/* ---------- footer ---------- */
+footer{border-top:.5px solid var(--rule);padding:40px 0 60px;color:var(--ink-faded);font-size:13px}
+.foot{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:32px}
+.foot-brand{display:flex;flex-direction:column;gap:8px;max-width:340px}
+.foot-brand .row{display:flex;align-items:center;gap:10px;color:var(--ink)}
+.foot-brand .row img{width:22px;height:22px}
+.foot-brand .tag{font-family:var(--font-serif);font-style:italic;font-size:14px;color:var(--ink-faded)}
+.foot-cols{display:flex;gap:64px;flex-wrap:wrap}
+.foot-col h6{font-family:var(--font-mono);font-size:10.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-ghost);margin:0 0 12px}
+.foot-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.foot-col a{color:var(--ink-soft)}
+.foot-col a:hover{color:var(--ink)}
+.colophon{margin-top:36px;padding-top:20px;border-top:.5px solid var(--rule-soft);font-family:var(--font-mono);font-size:11px;color:var(--ink-ghost);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+/* small utilities */
+.ital{font-style:italic}
+.tag-inline{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-faded);background:var(--paper-deep);border:.5px solid var(--rule-soft);
+  padding:2px 7px;border-radius:99px;display:inline-flex;align-items:center;gap:5px;vertical-align:middle;
+}
+
+/* canvas-graph mock */
+.node{
+  position:absolute;background:var(--paper-soft);border:.5px solid var(--rule);border-radius:6px;
+  padding:7px 9px;font-size:10.5px;line-height:1.3;color:var(--ink);box-shadow:var(--shadow-1);
+  font-family:var(--font-serif);max-width:120px;
+}
+.node.lead{border-color:var(--walnut);background:var(--paper)}
+.node .lab{font-family:var(--font-mono);font-size:8.5px;color:var(--ink-faded);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="container nav-inner">
+    <div class="brand">
+      <img src="assets/icon.svg" alt="" />
+      <span>PaperFlow</span>
+      <span class="ver">v0.1</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#install" class="btn btn-primary">Add to Chrome</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero container">
+  <div class="hero-grid">
+    <div>
+      <span class="eyebrow"><span class="dot"></span>Open beta · arXiv &amp; PDFs</span>
+      <h1>Read papers like a&nbsp;<span class="ital">researcher</span>, not a&nbsp;<span class="hl">tab&nbsp;hoarder</span>.</h1>
+      <p class="lede">PaperFlow turns any arXiv abstract or PDF into a focused reading desk: an AI workspace in the margins, citation-aware chat, and a library that remembers what you actually&nbsp;read.</p>
+      <div class="cta-row">
+        <a href="#install" class="btn btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Add to Chrome — free
+        </a>
+        <a href="#how" class="btn btn-ghost">Watch the 90s tour →</a>
+      </div>
+      <div class="cta-meta">
+        <span>Bring your own keys</span><span class="pip"></span>
+        <span>Works offline-first</span><span class="pip"></span>
+        <span>No tracking</span>
+      </div>
+    </div>
+
+    <div style="position:relative">
+      <div class="preview">
+        <div class="preview-bar">
+          <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="url">arxiv.org/abs/2403.04816 · opened in PaperFlow</div>
+        </div>
+        <div class="preview-app">
+          <div class="paper-pane">
+            <div class="paper-meta">arXiv:2403.04816 · cs.LG · 12 pp.</div>
+            <h3>Sparse Mixtures of Discrete Retrievers for Open-Domain Reasoning</h3>
+            <div class="authors">L. Aldana, J. Park, M. Petrov, S. Yeo · 2024</div>
+            <div class="body">
+              <p><b>Abstract.</b> We introduce <span class="yel">SMoDR</span>, a sparse mixture of discrete retrievers that decouples retrieval from reasoning at the&nbsp;token level<sup>[3]</sup>. By routing only the&nbsp;top-k experts per query, SMoDR achieves a <span class="red">2.4× speedup</span> over dense baselines while improving exact-match by&nbsp;3.1 points<sup>[7]</sup>.</p>
+              <div class="eqn">
+                ℒ<sub>route</sub> = 𝔼<sub>q∼𝒬</sub>[ −log Σ<sub>k∈𝒯<sub>q</sub></sub> π<sub>θ</sub>(k|q)·s(k,q) ]
+                <span class="eqn-tag">(3)</span>
+              </div>
+              <p>The router is trained jointly with a&nbsp;contrastive objective, similar in spirit to <span class="yel">prior work on sparse MoE</span><sup>[12]</sup>, but with a&nbsp;quantized expert identity that…</p>
+            </div>
+          </div>
+
+          <div class="chat-pane">
+            <div class="chat-tabs">
+              <span class="act">Chat</span><span>Notes</span><span>Outline</span>
+            </div>
+            <div class="chat-msgs">
+              <div class="msg user">
+                <div class="who">You</div>
+                <div class="bubble">Plain-English: what does eq.&nbsp;3 actually do?</div>
+              </div>
+              <div class="msg ai">
+                <div class="who">PaperFlow</div>
+                <div class="bubble">It's a router loss — for each query <i>q</i>, only the&nbsp;experts in the&nbsp;top-k set 𝒯<sub>q</sub> contribute, and the&nbsp;model is rewarded when the&nbsp;chosen experts score the&nbsp;query well<sup>[3]</sup>.</div>
+              </div>
+            </div>
+            <div class="chat-input">
+              <span>Ask about §3.2…</span>
+              <span class="kbd">⌘ ⏎</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="margin-note">
+        margin notes ↳<br>"compare to&nbsp;Switch Transformer routing"
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="trust">
+  <div class="container trust-inner">
+    <span>Loved by 4,200+ readers</span>
+    <span>arXiv · OpenReview · NeurIPS PDFs</span>
+    <span>BYOK: OpenAI · Anthropic · local</span>
+    <span>MIT-licensed core</span>
+  </div>
+</div>
+
+<!-- problem -->
+<section class="s problem">
+  <div class="container">
+    <div class="section-eyebrow">The state of paper reading</div>
+    <h2>You opened seventeen tabs this morning. <span class="ital">You closed all of them by lunch.</span></h2>
+    <div style="height:32px"></div>
+    <div class="problem-grid">
+      <div class="problem-item">
+        <div class="num">01 / Skim</div>
+        <h4>Abstracts blur together.</h4>
+        <p>Three tabs in, you can't remember which paper proposed which trick. The&nbsp;reading list grows; the&nbsp;recall doesn't.</p>
+      </div>
+      <div class="problem-item">
+        <div class="num">02 / Lose</div>
+        <h4>Highlights vanish into PDFs.</h4>
+        <p>Your annotations live on whichever device, in whichever app, in whichever folder you last forgot about.</p>
+      </div>
+      <div class="problem-item">
+        <div class="num">03 / Drift</div>
+        <h4>Citations turn into rabbit holes.</h4>
+        <p>You click <span class="tag-inline">[12]</span> and twenty minutes later you're on a&nbsp;preprint from 2018 about something else entirely.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- features -->
+<section class="s" id="features">
+  <div class="container">
+    <div class="section-eyebrow">What's in the binder</div>
+    <h2>A reading desk that <span class="ital">stays out of the way</span> until you need it.</h2>
+    <p class="lede">Every feature is built on the same idea: keep the&nbsp;paper centered, keep the&nbsp;AI in the&nbsp;margins, and let you decide which model does the&nbsp;thinking.</p>
+
+    <div class="features">
+      <!-- big hero card -->
+      <div class="feature hero-card">
+        <div class="hero-card-grid">
+          <div class="hero-card-text">
+            <div class="num">F · 01</div>
+            <h3 style="font-size:30px;margin:10px 0 12px">Citation-aware chat, anchored&nbsp;to&nbsp;the&nbsp;text.</h3>
+            <p>Ask about §3.2, equation 7, or "what does the&nbsp;ablation say"? PaperFlow grounds every answer in the&nbsp;passages it actually used — and the&nbsp;superscripts are clickable.</p>
+            <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap">
+              <span class="tag-inline">grounded answers</span>
+              <span class="tag-inline">jump-to-source</span>
+              <span class="tag-inline">section context</span>
+            </div>
+          </div>
+          <div class="hero-card-vis">
+            <div class="vis-chat">
+              <div class="row">
+                <span class="av u">YOU</span>
+                <div class="txt">Does the model degrade on out-of-distribution queries? cite the relevant table.</div>
+              </div>
+              <div class="row">
+                <span class="av a">PF</span>
+                <div class="txt">On OOD-Math (Tab.&nbsp;4), accuracy drops from 71.2 → 64.8<sup>[14]</sup>. The authors attribute this to expert-collapse on rare token paths<sup>[15]</sup>, and propose load-balancing as future work<sup>[16]</sup>.</div>
+              </div>
+              <div class="row">
+                <span class="av u">YOU</span>
+                <div class="txt">summarize §5 in three bullets, then quote the strongest sentence in §5.3.</div>
+              </div>
+              <div class="row">
+                <span class="av a">PF</span>
+                <div class="txt"><i>Streaming…</i> ① Routing latency is the bottleneck<sup>[21]</sup>. ② Sparse experts beat dense at &gt;7B<sup>[22]</sup>. ③ The&nbsp;quantized router…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- overview card -->
+      <div class="feature wide">
+        <div class="num">F · 02</div>
+        <h3>An overview that <span class="ital">earns its place</span>.</h3>
+        <p>The&nbsp;moment a&nbsp;paper opens, PaperFlow drafts contributions, keywords, and a&nbsp;structured outline — so you can decide in 30 seconds whether to keep reading.</p>
+        <div class="vis">
+          <div class="vis-overview">
+            <h5>Contributions</h5>
+            <ul>
+              <li>Sparse <i>discrete</i> router for retrieval-augmented MoE, top-k routing per query token.</li>
+              <li>Joint training objective (eq.&nbsp;3) that decouples retrieval from reasoning.</li>
+              <li>2.4× wall-clock speedup at fixed accuracy on Math &amp; Reasoning suites.</li>
+            </ul>
+            <div style="height:14px"></div>
+            <h5>Keywords</h5>
+            <div class="vis-keywords" style="margin-top:6px">
+              <span class="kw">mixture of experts</span>
+              <span class="kw">retrieval</span>
+              <span class="kw">sparse routing</span>
+              <span class="kw">open-domain QA</span>
+              <span class="kw">contrastive training</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- citation popover card -->
+      <div class="feature tall">
+        <div class="num">F · 03</div>
+        <h3>Footnotes that <span class="ital">talk back</span>.</h3>
+        <p>Hover any citation to see the&nbsp;target reference inline. Click to scroll-pin the&nbsp;source paragraph — no lost place, no fifteen open tabs.</p>
+        <div class="vis">
+          <div class="vis-cite">
+            We extend the&nbsp;quantized routing scheme of Wei et&nbsp;al.<sup>[12]</sup> to discrete retrieval, drawing on the&nbsp;capacity-balance idea introduced by Fedus et&nbsp;al.<sup>[14]</sup>.
+            <div class="pop">
+              <span class="name">[14] Fedus, Zoph, Shazeer · 2022</span>
+              Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity. <i>JMLR</i>, 23(120).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- canvas/graph card -->
+      <div class="feature">
+        <div class="num">F · 04</div>
+        <h3>A <span class="ital">canvas</span> for the papers behind the&nbsp;paper.</h3>
+        <p>Watch your reading list assemble itself: each cited work becomes a&nbsp;node, dragged onto a&nbsp;warm-paper canvas you can pan and follow.</p>
+        <div class="vis">
+          <div class="vis-graph">
+            <svg width="100%" height="100%" style="position:absolute;inset:0" viewBox="0 0 320 180" preserveAspectRatio="none">
+              <line x1="160" y1="92" x2="60" y2="40" stroke="var(--walnut-soft)" stroke-width="1" stroke-dasharray="3 4" opacity=".7"/>
+              <line x1="160" y1="92" x2="262" y2="38" stroke="var(--walnut-soft)" stroke-width="1" stroke-dasharray="3 4" opacity=".7"/>
+              <line x1="160" y1="92" x2="46" y2="148" stroke="var(--walnut-soft)" stroke-width="1" stroke-dasharray="3 4" opacity=".7"/>
+              <line x1="160" y1="92" x2="266" y2="146" stroke="var(--walnut-soft)" stroke-width="1" stroke-dasharray="3 4" opacity=".7"/>
+            </svg>
+            <div class="node lead" style="left:50%;top:50%;transform:translate(-50%,-50%)"><span class="lab">Reading</span>SMoDR · 2024</div>
+            <div class="node" style="left:8px;top:14px"><span class="lab">[3]</span>Wei et&nbsp;al. · QSparse</div>
+            <div class="node" style="right:8px;top:12px"><span class="lab">[14]</span>Fedus · Switch&nbsp;T.</div>
+            <div class="node" style="left:6px;bottom:10px"><span class="lab">[7]</span>Park · Routing</div>
+            <div class="node" style="right:8px;bottom:10px"><span class="lab">[21]</span>Yeo · LB-MoE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- byok models card -->
+      <div class="feature">
+        <div class="num">F · 05</div>
+        <h3>Your keys. <span class="ital">Your models.</span></h3>
+        <p>OpenAI-compatible templates ship out of the&nbsp;box. Bring Claude, GPT-5, Gemini, DeepSeek, or a&nbsp;local Ollama box — PaperFlow doesn't care, and never sees your traffic.</p>
+        <div class="vis">
+          <div class="vis-models">
+            <span class="chip"><span class="dt"></span>claude-haiku-4.5</span>
+            <span class="chip"><span class="dt"></span>gpt-5-mini</span>
+            <span class="chip byok"><span class="dt"></span>gemini-2.5-pro</span>
+            <span class="chip byok"><span class="dt"></span>deepseek-v3</span>
+            <span class="chip local"><span class="dt"></span>ollama / llama-3.3</span>
+            <span class="chip local"><span class="dt"></span>lm-studio</span>
+            <span class="chip"><span class="dt"></span>+ openai-compatible</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- library card -->
+      <div class="feature">
+        <div class="num">F · 06</div>
+        <h3>A library that <span class="ital">remembers</span> what you read.</h3>
+        <p>Every opened paper, every highlight, every note — synced across devices, searchable in plain language, exportable as Markdown when you've had enough.</p>
+        <div class="vis">
+          <div style="display:flex;flex-direction:column;gap:6px;font-family:var(--font-serif);font-size:13px">
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--paper);border:.5px solid var(--rule-soft);border-radius:6px"><span>SMoDR · sparse mixture of retrievers <span style="color:var(--walnut);font-family:var(--font-mono);font-size:10px;margin-left:6px">·12</span></span><span style="font-family:var(--font-mono);font-size:10px;color:var(--ink-faded)">today</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--paper);border:.5px solid var(--rule-soft);border-radius:6px"><span>Switch Transformers <span style="color:var(--walnut);font-family:var(--font-mono);font-size:10px;margin-left:6px">·4</span></span><span style="font-family:var(--font-mono);font-size:10px;color:var(--ink-faded)">2d</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--paper);border:.5px solid var(--rule-soft);border-radius:6px"><span>QSparse: quantized routing <span style="color:var(--walnut);font-family:var(--font-mono);font-size:10px;margin-left:6px">·9</span></span><span style="font-family:var(--font-mono);font-size:10px;color:var(--ink-faded)">5d</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--paper);border:.5px solid var(--rule-soft);border-radius:6px;opacity:.55"><span>Load-balanced MoE — <i>finished</i></span><span style="font-family:var(--font-mono);font-size:10px;color:var(--ink-faded)">last week</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- how it works -->
+<section class="s" id="how" style="padding-top:48px">
+  <div class="container">
+    <div class="section-eyebrow">How it works</div>
+    <h2>Four steps from <span class="ital">arxiv.org/abs/…</span> to read.</h2>
+  </div>
+  <div style="height:24px"></div>
+  <div class="container" style="padding:0">
+    <div class="how">
+      <div class="step">
+        <div class="n">i.</div>
+        <h4>Install the&nbsp;extension.</h4>
+        <p>Pin the&nbsp;walnut paper icon. PaperFlow only touches arXiv pages and PDF tabs — nothing else.</p>
+      </div>
+      <div class="step">
+        <div class="n">ii.</div>
+        <h4>Open any paper.</h4>
+        <p>arXiv abstract, hosted PDF, or local file&nbsp;://. The reader takes over with a&nbsp;clean two-pane desk.</p>
+      </div>
+      <div class="step">
+        <div class="n">iii.</div>
+        <h4>Bring a&nbsp;model key.</h4>
+        <p>Paste an OpenAI, Anthropic, or compatible endpoint. PaperFlow stores it locally — never on our servers.</p>
+      </div>
+      <div class="step">
+        <div class="n">iv.</div>
+        <h4>Read, ask, save.</h4>
+        <p>Chat in the&nbsp;margin, highlight as you go. Every note &amp; citation is one&nbsp;⌘K away forever.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- byok / privacy -->
+<section class="s" id="privacy" style="padding-top:64px">
+  <div class="container">
+    <div class="byok">
+      <div>
+        <span class="eyebrow"><span class="dot" style="background:var(--walnut-soft)"></span>BYOK · privacy by default</span>
+        <h2>Your <span class="ital">keys</span>, your <span class="ital">models</span>, your <span class="ital">papers</span>. Nothing routes through&nbsp;us.</h2>
+        <p>We don't host model traffic. We don't read your library. The&nbsp;extension is local-first; sync is end-to-end and entirely optional.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a href="#install" class="btn btn-ghost" style="background:rgba(255,255,255,.06);color:var(--paper-soft);border-color:rgba(255,255,255,.18)">Read the threat model →</a>
+          <a href="#" class="btn btn-ghost" style="background:rgba(255,255,255,.06);color:var(--paper-soft);border-color:rgba(255,255,255,.18)">View source on GitHub</a>
+        </div>
+      </div>
+      <div class="specs">
+        <div class="spec-row"><span class="k">storage</span><span class="v">All papers, notes &amp; chat history stored in <code>chrome.storage.local</code> by default.</span></div>
+        <div class="spec-row"><span class="k">sync</span><span class="v">Optional. Encrypted with a&nbsp;passphrase only your browser knows.</span></div>
+        <div class="spec-row"><span class="k">tracking</span><span class="v">Zero analytics. No fingerprinting. No paper-content telemetry.</span></div>
+        <div class="spec-row"><span class="k">licence</span><span class="v">Reader core is MIT. Self-host the&nbsp;sync server in 8&nbsp;minutes.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- testimonial -->
+<section class="quote">
+  <div class="container">
+    <blockquote>It finally feels like reading instead of triage. The&nbsp;chat in the&nbsp;margin is what every PDF reader should have shipped a&nbsp;decade ago.</blockquote>
+    <div class="by"><span class="name">Dr.&nbsp;Imani Reyes</span> &nbsp;·&nbsp; postdoc, computational neuroscience</div>
+  </div>
+</section>
+
+<!-- final CTA -->
+<section class="final-cta" id="install">
+  <div class="container">
+    <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;color:var(--walnut-deep);text-transform:uppercase;margin-bottom:18px">v0.1 · open beta</div>
+    <h2>Stop hoarding tabs.<br>Start <span class="ital">finishing&nbsp;papers</span>.</h2>
+    <p>Free while in beta. No account required to read.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a class="btn btn-primary" href="#" style="padding:14px 22px;font-size:15px">Add PaperFlow to Chrome</a>
+      <a class="btn btn-ghost" href="#" style="padding:14px 22px;font-size:15px">Read the launch notes →</a>
+    </div>
+    <div style="margin-top:28px;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--ink-faded);text-transform:uppercase">
+      ⌘K command palette · works offline · MIT licensed
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot">
+      <div class="foot-brand">
+        <div class="row"><img src="assets/icon.svg" alt=""><strong>PaperFlow</strong></div>
+        <div class="tag">An AI-assisted paper reader for arXiv &amp; PDFs. Built by readers, for readers.</div>
+      </div>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h6>Product</h6>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how">How it works</a></li>
+            <li><a href="#privacy">Privacy</a></li>
+            <li><a href="#">Changelog</a></li>
+          </ul>
+        </div>
+        <div class="foot-col">
+          <h6>Resources</h6>
+          <ul>
+            <li><a href="#">Docs</a></li>
+            <li><a href="#">BYOK setup</a></li>
+            <li><a href="#">Self-hosted sync</a></li>
+            <li><a href="#">GitHub</a></li>
+          </ul>
+        </div>
+        <div class="foot-col">
+          <h6>Company</h6>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Threat model</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="colophon">
+      <span>© 2026 PaperFlow · Set in Newsreader &amp; Inter Tight</span>
+      <span>Made on warm paper</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

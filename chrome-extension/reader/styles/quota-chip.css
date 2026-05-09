@@ -1,0 +1,55 @@
+/* QuotaChip · spec §10.4 + §14.5.5.2 — top-bar pill reflecting AI usage state.
+ *
+ * Task B10 will land --amber, --amber-soft, --foxglove-soft, --forest-soft,
+ * --sky-soft tokens in tokens.css. Until then, the var(--token, #fallback)
+ * pattern keeps rendering correct. B10 may later drop the fallbacks or fold
+ * these rules into tokens.css entirely. */
+
+.quota-chip {
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  line-height: 1.4;
+  cursor: pointer;
+  border: none;
+  background: var(--paper-deep);
+  color: var(--ink-soft);
+  white-space: nowrap;
+  transition: background 80ms ease-out, color 80ms ease-out;
+}
+
+.quota-chip:hover {
+  filter: brightness(1.02);
+}
+
+.quota-chip:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 2px;
+}
+
+/* 5 states — fallback hex matches the B10 tokens that land later. */
+.quota-free-normal {
+  background: var(--paper-deep);
+  color: var(--ink-soft);
+}
+
+.quota-free-warn {
+  background: var(--amber-soft, #FCE5D4);
+  color: var(--amber, #C68148);
+}
+
+.quota-free-critical {
+  background: var(--foxglove-soft, #FADBD8);
+  color: var(--foxglove);
+}
+
+.quota-pro {
+  background: var(--forest-soft, #D6E5DC);
+  color: var(--forest);
+}
+
+.quota-sync {
+  background: var(--sky-soft, #D6E2EE);
+  color: var(--sky);
+}

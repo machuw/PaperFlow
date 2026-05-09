@@ -1,0 +1,57 @@
+/* MigrationBanner — Phase C Task C3 · spec §7 + §14.2.2.1 */
+
+.migration-banner {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 8px 16px;
+  background: var(--paper-deep);
+  border-bottom: 0.5px solid var(--rule);
+  font-family: var(--font-sans);
+  font-size: var(--t-xs);
+  color: var(--ink-soft);
+}
+
+.migration-banner-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.migration-banner-progress {
+  height: 2px;
+  background: var(--rule-soft);
+  border-radius: 1px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.migration-banner-progress-fill {
+  height: 100%;
+  background: var(--walnut);
+  transition: width 200ms ease-out;
+}
+
+.migration-banner-paused {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--foxglove);
+}
+
+.migration-banner-retry {
+  padding: 4px 12px;
+  background: var(--foxglove);
+  color: var(--paper-soft);
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: var(--t-xs);
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+.migration-banner-retry:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 2px;
+}

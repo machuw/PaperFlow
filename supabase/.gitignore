@@ -1,0 +1,17 @@
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env
+.env.keys
+.env.local
+.env.*.local
+.env.production
+.env.*.production
+
+# local dev notes (may contain keys)
+.env.local-devnote.md
+
+# DB dumps / backups — may contain user data, never commit
+backups/

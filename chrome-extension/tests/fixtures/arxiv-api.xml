@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <entry>
+    <id>http://arxiv.org/abs/2402.18413v2</id>
+    <title>Contextual Residuals: A Lightweight Memory for Long-Horizon Transformers</title>
+    <summary>We propose a lightweight per-chunk residual memory that injects past context as an attention bias, closing most of the gap to a 128k baseline with 1/8 the FLOPs.</summary>
+    <author><name>Khan, Y.</name></author>
+    <author><name>Voigt, R.</name></author>
+    <published>2026-02-14T00:00:00Z</published>
+    <category term="cs.LG"/>
+  </entry>
+</feed>

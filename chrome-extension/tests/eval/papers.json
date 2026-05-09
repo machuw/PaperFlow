@@ -1,0 +1,352 @@
+[
+  {
+    "paperId": "p-attention-2017",
+    "arxivId": "1706.03762",
+    "arxivUrl": "https://arxiv.org/abs/1706.03762",
+    "title": "Attention Is All You Need",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-bert-2018",
+    "arxivId": "1810.04805",
+    "arxivUrl": "https://arxiv.org/abs/1810.04805",
+    "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-gpt3-2020",
+    "arxivId": "2005.14165",
+    "arxivUrl": "https://arxiv.org/abs/2005.14165",
+    "title": "Language Models are Few-Shot Learners",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-word2vec-2013",
+    "arxivId": "1301.3781",
+    "arxivUrl": "https://arxiv.org/abs/1301.3781",
+    "title": "Efficient Estimation of Word Representations in Vector Space",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-qlora-2023",
+    "arxivId": "2305.14314",
+    "arxivUrl": "https://arxiv.org/abs/2305.14314",
+    "title": "QLoRA: Efficient Finetuning of Quantized LLMs",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-word2vec-distrib-2013",
+    "arxivId": "1310.4546",
+    "arxivUrl": "https://arxiv.org/abs/1310.4546",
+    "title": "Distributed Representations of Words and Phrases and their Compositionality",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-vit-2020",
+    "arxivId": "2010.11929",
+    "arxivUrl": "https://arxiv.org/abs/2010.11929",
+    "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-resnet-2015",
+    "arxivId": "1512.03385",
+    "arxivUrl": "https://arxiv.org/abs/1512.03385",
+    "title": "Deep Residual Learning for Image Recognition",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-llama2-2023",
+    "arxivId": "2307.09288",
+    "arxivUrl": "https://arxiv.org/abs/2307.09288",
+    "title": "Llama 2: Open Foundation and Fine-Tuned Chat Models",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-llama-2023",
+    "arxivId": "2302.13971",
+    "arxivUrl": "https://arxiv.org/abs/2302.13971",
+    "title": "LLaMA: Open and Efficient Foundation Language Models",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-mistral-2023",
+    "arxivId": "2310.06825",
+    "arxivUrl": "https://arxiv.org/abs/2310.06825",
+    "title": "Mistral 7B",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-instructgpt-2022",
+    "arxivId": "2203.02155",
+    "arxivUrl": "https://arxiv.org/abs/2203.02155",
+    "title": "Training language models to follow instructions with human feedback",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-chinchilla-2022",
+    "arxivId": "2203.15556",
+    "arxivUrl": "https://arxiv.org/abs/2203.15556",
+    "title": "Training Compute-Optimal Large Language Models",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-flashattention-2022",
+    "arxivId": "2205.14135",
+    "arxivUrl": "https://arxiv.org/abs/2205.14135",
+    "title": "FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-rlhf-2017",
+    "arxivId": "1706.03741",
+    "arxivUrl": "https://arxiv.org/abs/1706.03741",
+    "title": "Deep Reinforcement Learning from Human Preferences",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-gan-2014",
+    "arxivId": "1406.2661",
+    "arxivUrl": "https://arxiv.org/abs/1406.2661",
+    "title": "Generative Adversarial Networks",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-vae-2013",
+    "arxivId": "1312.6114",
+    "arxivUrl": "https://arxiv.org/abs/1312.6114",
+    "title": "Auto-Encoding Variational Bayes",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-dropout-2014",
+    "arxivId": "1207.0580",
+    "arxivUrl": "https://arxiv.org/abs/1207.0580",
+    "title": "Improving neural networks by preventing co-adaptation of feature detectors",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-batchnorm-2015",
+    "arxivId": "1502.03167",
+    "arxivUrl": "https://arxiv.org/abs/1502.03167",
+    "title": "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-adam-2014",
+    "arxivId": "1412.6980",
+    "arxivUrl": "https://arxiv.org/abs/1412.6980",
+    "title": "Adam: A Method for Stochastic Optimization",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-seq2seq-2014",
+    "arxivId": "1409.3215",
+    "arxivUrl": "https://arxiv.org/abs/1409.3215",
+    "title": "Sequence to Sequence Learning with Neural Networks",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-bahdanau-2014",
+    "arxivId": "1409.0473",
+    "arxivUrl": "https://arxiv.org/abs/1409.0473",
+    "title": "Neural Machine Translation by Jointly Learning to Align and Translate",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-clip-2021",
+    "arxivId": "2103.00020",
+    "arxivUrl": "https://arxiv.org/abs/2103.00020",
+    "title": "Learning Transferable Visual Models From Natural Language Supervision",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-diffusion-2020",
+    "arxivId": "2006.11239",
+    "arxivUrl": "https://arxiv.org/abs/2006.11239",
+    "title": "Denoising Diffusion Probabilistic Models",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-deepseek-2024",
+    "arxivId": "2401.02954",
+    "arxivUrl": "https://arxiv.org/abs/2401.02954",
+    "title": "DeepSeek LLM: Scaling Open-Source Language Models with Longtermism",
+    "category": "nlp-ml"
+  },
+  {
+    "paperId": "p-tabpfn-2022",
+    "arxivId": "2207.01848",
+    "arxivUrl": "https://arxiv.org/abs/2207.01848",
+    "title": "TabPFN: A Transformer That Solves Small Tabular Classification Problems in a Second",
+    "category": "stats"
+  },
+  {
+    "paperId": "p-bayesian-opt-2010",
+    "arxivId": "1012.2599",
+    "arxivUrl": "https://arxiv.org/abs/1012.2599",
+    "title": "A Tutorial on Bayesian Optimization of Expensive Cost Functions, with Application to Active User Modeling and Hierarchical Reinforcement Learning",
+    "category": "stats"
+  },
+  {
+    "paperId": "p-learn-causality-2018",
+    "arxivId": "1809.09337",
+    "arxivUrl": "https://arxiv.org/abs/1809.09337",
+    "title": "A Survey of Learning Causality with Data: Problems and Methods",
+    "category": "stats"
+  },
+  {
+    "paperId": "p-conformal-2021",
+    "arxivId": "2107.07511",
+    "arxivUrl": "https://arxiv.org/abs/2107.07511",
+    "title": "A Gentle Introduction to Conformal Prediction and Distribution-Free Uncertainty Quantification",
+    "category": "stats"
+  },
+  {
+    "paperId": "p-vi-review-2017",
+    "arxivId": "1601.00670",
+    "arxivUrl": "https://arxiv.org/abs/1601.00670",
+    "title": "Variational Inference: A Review for Statisticians",
+    "category": "stats"
+  },
+  {
+    "paperId": "p-rethinking-gen-2017",
+    "arxivId": "1611.03530",
+    "arxivUrl": "https://arxiv.org/abs/1611.03530",
+    "title": "Understanding deep learning requires rethinking generalization",
+    "category": "stats"
+  },
+  {
+    "paperId": "p-thompson-2017",
+    "arxivId": "1707.02038",
+    "arxivUrl": "https://arxiv.org/abs/1707.02038",
+    "title": "A Tutorial on Thompson Sampling",
+    "category": "stats"
+  },
+  {
+    "paperId": "p-bandit-regret-2012",
+    "arxivId": "1204.5721",
+    "arxivUrl": "https://arxiv.org/abs/1204.5721",
+    "title": "Regret Analysis of Stochastic and Nonstochastic Multi-armed Bandit Problems",
+    "category": "stats"
+  },
+  {
+    "paperId": "p-sghmc-2014",
+    "arxivId": "1402.4102",
+    "arxivUrl": "https://arxiv.org/abs/1402.4102",
+    "title": "Stochastic Gradient Hamiltonian Monte Carlo",
+    "category": "stats"
+  },
+  {
+    "paperId": "p-scaling-laws-2020",
+    "arxivId": "2001.08361",
+    "arxivUrl": "https://arxiv.org/abs/2001.08361",
+    "title": "Scaling Laws for Neural Language Models",
+    "category": "stats"
+  },
+  {
+    "paperId": "p-perelman-poincare-2002",
+    "arxivId": "math/0211159",
+    "arxivUrl": "https://arxiv.org/abs/math/0211159",
+    "title": "The entropy formula for the Ricci flow and its geometric applications",
+    "category": "math"
+  },
+  {
+    "paperId": "p-green-tao-2004",
+    "arxivId": "math/0404188",
+    "arxivUrl": "https://arxiv.org/abs/math/0404188",
+    "title": "The primes contain arbitrarily long arithmetic progressions",
+    "category": "math"
+  },
+  {
+    "paperId": "p-perelman-extinction-2003",
+    "arxivId": "math/0307245",
+    "arxivUrl": "https://arxiv.org/abs/math/0307245",
+    "title": "Finite extinction time for the solutions to the Ricci flow on certain three-manifolds",
+    "category": "math"
+  },
+  {
+    "paperId": "p-mathlib-2019",
+    "arxivId": "1910.09336",
+    "arxivUrl": "https://arxiv.org/abs/1910.09336",
+    "title": "The Lean mathematical library",
+    "category": "math"
+  },
+  {
+    "paperId": "p-perelman-surgery-2003",
+    "arxivId": "math/0303109",
+    "arxivUrl": "https://arxiv.org/abs/math/0303109",
+    "title": "Ricci flow with surgery on three-manifolds",
+    "category": "math"
+  },
+  {
+    "paperId": "p-tao-hypergraph-2006",
+    "arxivId": "math/0602037",
+    "arxivUrl": "https://arxiv.org/abs/math/0602037",
+    "title": "A correspondence principle between (hyper)graph theory and probability theory, and the (hyper)graph removal lemma",
+    "category": "math"
+  },
+  {
+    "paperId": "p-tao-besicovitch-2002",
+    "arxivId": "math/0204251",
+    "arxivUrl": "https://arxiv.org/abs/math/0204251",
+    "title": "A new bound for finite field Besicovitch sets in four dimensions",
+    "category": "math"
+  },
+  {
+    "paperId": "p-hairer-regularity-2013",
+    "arxivId": "1303.5113",
+    "arxivUrl": "https://arxiv.org/abs/1303.5113",
+    "title": "A theory of regularity structures",
+    "category": "math"
+  },
+  {
+    "paperId": "p-higgs-atlas-2012",
+    "arxivId": "1207.7214",
+    "arxivUrl": "https://arxiv.org/abs/1207.7214",
+    "title": "Observation of a new particle in the search for the Standard Model Higgs boson with the ATLAS detector at the LHC",
+    "category": "physics"
+  },
+  {
+    "paperId": "p-higgs-cms-2012",
+    "arxivId": "1207.7235",
+    "arxivUrl": "https://arxiv.org/abs/1207.7235",
+    "title": "Observation of a new boson at a mass of 125 GeV with the CMS experiment at the LHC",
+    "category": "physics"
+  },
+  {
+    "paperId": "p-ligo-gw150914-2016",
+    "arxivId": "1602.03837",
+    "arxivUrl": "https://arxiv.org/abs/1602.03837",
+    "title": "Observation of Gravitational Waves from a Binary Black Hole Merger",
+    "category": "physics"
+  },
+  {
+    "paperId": "p-eht-m87-2019",
+    "arxivId": "1906.11238",
+    "arxivUrl": "https://arxiv.org/abs/1906.11238",
+    "title": "First M87 Event Horizon Telescope Results. I. The Shadow of the Supermassive Black Hole",
+    "category": "physics"
+  },
+  {
+    "paperId": "p-planck-cosmology-2018",
+    "arxivId": "1807.06209",
+    "arxivUrl": "https://arxiv.org/abs/1807.06209",
+    "title": "Planck 2018 results. VI. Cosmological parameters",
+    "category": "physics"
+  },
+  {
+    "paperId": "p-supernovae-1998",
+    "arxivId": "astro-ph/9805201",
+    "arxivUrl": "https://arxiv.org/abs/astro-ph/9805201",
+    "title": "Observational Evidence from Supernovae for an Accelerating Universe and a Cosmological Constant",
+    "category": "physics"
+  },
+  {
+    "paperId": "p-kklt-desitter-2003",
+    "arxivId": "hep-th/0301240",
+    "arxivUrl": "https://arxiv.org/abs/hep-th/0301240",
+    "title": "de Sitter Vacua in String Theory",
+    "category": "physics"
+  }
+]

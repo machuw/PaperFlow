@@ -1,0 +1,82 @@
+/* chrome-extension/reader/styles/trace-card.css
+ * Phase 11 Plan 07: scoped CSS for TraceStack/TraceCard.
+ * Contract: zero new tokens.css edits — all colors from existing token system.
+ * Includes: prefers-reduced-motion accommodation (UI-SPEC §7.1) +
+ *           sr-only visually-hidden utility (UI-SPEC §10) +
+ *           JSON pre wrapping (UI-SPEC §11 risk note: pre-wrap on narrow panels).
+ */
+
+.pf-trace-card-button {
+  /* Native button with our card visual; reset browser defaults. */
+  width: 100%;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.pf-trace-card-button:focus-visible {
+  /* Inherit global *:focus-visible from tokens.css:233-238 (2px walnut outline). */
+  outline-offset: 2px;
+}
+
+.pf-trace-json-pre {
+  font-family: var(--font-mono);
+  font-size: var(--t-xs);
+  line-height: 1.55;
+  color: var(--ink-soft);
+  white-space: pre-wrap;     /* UI-SPEC §11 — wrap long JSON on narrow panels */
+  word-break: break-all;
+  margin: 0 0 8px;
+}
+
+.pf-trace-output-truncated {
+  max-height: 64px;
+  overflow: hidden;
+  position: relative;
+}
+.pf-trace-output-truncated::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: linear-gradient(transparent, var(--paper-soft) 90%);
+  pointer-events: none;
+}
+.pf-trace-output-expanded {
+  max-height: 240px;
+  overflow: auto;
+}
+
+.pf-sr-only {
+  /* WCAG 2.1 visually-hidden span pattern. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-trace-card,
+  .pf-trace-card * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .pf-trace-spinner {
+    display: none;
+  }
+  .pf-trace-spinner-fallback {
+    display: inline;
+  }
+}
+
+/* Spinner fallback hidden by default (only shown via reduce-motion media query). */
+.pf-trace-spinner-fallback {
+  display: none;
+}

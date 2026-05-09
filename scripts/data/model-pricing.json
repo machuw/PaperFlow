@@ -1,0 +1,162 @@
+{
+  "fetched_at": "2026-05-07",
+  "_format_note": "input_price_per_1m / output_price_per_1m are USD per 1,000,000 tokens. tier_class ∈ {mini,flagship,frontier}. Use number for known prices, string \"tbd\" if no public price found.",
+  "models": [
+    {
+      "id": "gpt-4o-mini",
+      "display_name": "GPT-4o mini",
+      "provider": "openai",
+      "tier_class": "mini",
+      "input_price_per_1m": 0.15,
+      "output_price_per_1m": 0.60,
+      "context_window_tokens": 128000,
+      "source_url": "https://developers.openai.com/api/docs/models/gpt-4o-mini",
+      "fetched_at": "2026-05-07",
+      "_note": "Standard non-cached, non-batch text token pricing. gpt-4o-mini remains a cost-anchored mini option in early 2026."
+    },
+    {
+      "id": "gpt-4.1-mini",
+      "display_name": "GPT-4.1 mini",
+      "provider": "openai",
+      "tier_class": "mini",
+      "input_price_per_1m": 0.40,
+      "output_price_per_1m": 1.60,
+      "context_window_tokens": 1047576,
+      "source_url": "https://developers.openai.com/api/docs/models/gpt-4.1-mini",
+      "fetched_at": "2026-05-07",
+      "_note": "Standard non-cached, non-batch text token pricing. ~1M token context window."
+    },
+    {
+      "id": "claude-haiku-4-5-20251001",
+      "display_name": "Claude Haiku 4.5",
+      "provider": "anthropic",
+      "tier_class": "mini",
+      "input_price_per_1m": 1.00,
+      "output_price_per_1m": 5.00,
+      "context_window_tokens": 200000,
+      "source_url": "https://platform.claude.com/docs/en/docs/about-claude/pricing",
+      "fetched_at": "2026-05-07",
+      "_note": "Base input / output rates. Cache-hit reads are 0.10x ($0.10/MTok input). Batch API gives 50% discount ($0.50 / $2.50)."
+    },
+    {
+      "id": "gemini-2.5-flash",
+      "display_name": "Gemini 2.5 Flash",
+      "provider": "google",
+      "tier_class": "mini",
+      "input_price_per_1m": 0.30,
+      "output_price_per_1m": 2.50,
+      "context_window_tokens": 1048576,
+      "source_url": "https://ai.google.dev/pricing",
+      "fetched_at": "2026-05-07",
+      "_note": "Standard tier, text/image/video input. Audio input is $1.00/1M. Flex/Batch tier is half price; priority is ~1.8x."
+    },
+    {
+      "id": "gpt-4o",
+      "display_name": "GPT-4o",
+      "provider": "openai",
+      "tier_class": "flagship",
+      "input_price_per_1m": 2.50,
+      "output_price_per_1m": 10.00,
+      "context_window_tokens": 128000,
+      "source_url": "https://developers.openai.com/api/docs/models/gpt-4o",
+      "fetched_at": "2026-05-07",
+      "_note": "Standard non-cached, non-batch text token pricing. Effectively legacy now that gpt-5 family is generally available, but still listed."
+    },
+    {
+      "id": "claude-sonnet-4-5",
+      "display_name": "Claude Sonnet 4.5",
+      "provider": "anthropic",
+      "tier_class": "flagship",
+      "input_price_per_1m": 3.00,
+      "output_price_per_1m": 15.00,
+      "context_window_tokens": 200000,
+      "source_url": "https://platform.claude.com/docs/en/docs/about-claude/pricing",
+      "fetched_at": "2026-05-07",
+      "_note": "Base input / output rates. Batch API: $1.50 / $7.50. Cache hits: $0.30/MTok. 1M-token context option exists for Sonnet 4.6 (next entry)."
+    },
+    {
+      "id": "gemini-2.5-pro",
+      "display_name": "Gemini 2.5 Pro",
+      "provider": "google",
+      "tier_class": "flagship",
+      "input_price_per_1m": 1.25,
+      "output_price_per_1m": 10.00,
+      "context_window_tokens": 1048576,
+      "source_url": "https://ai.google.dev/pricing",
+      "fetched_at": "2026-05-07",
+      "_note": "Pricing shown is for prompts ≤200k tokens (standard tier). Prompts >200k are billed at $2.50 input / $15.00 output per 1M."
+    },
+    {
+      "id": "gpt-5",
+      "display_name": "GPT-5",
+      "provider": "openai",
+      "tier_class": "frontier",
+      "input_price_per_1m": 1.25,
+      "output_price_per_1m": 10.00,
+      "context_window_tokens": 400000,
+      "source_url": "https://developers.openai.com/api/docs/models/gpt-5",
+      "fetched_at": "2026-05-07",
+      "_note": "GPT-5 base model, GA. Successor variants gpt-5.1/5.2/5.4/5.5 also exist with different price points; this entry is the original gpt-5 SKU."
+    },
+    {
+      "id": "gpt-5-mini",
+      "display_name": "GPT-5 mini",
+      "provider": "openai",
+      "tier_class": "frontier",
+      "input_price_per_1m": 0.25,
+      "output_price_per_1m": 2.00,
+      "context_window_tokens": 400000,
+      "source_url": "https://developers.openai.com/api/docs/models/gpt-5-mini",
+      "fetched_at": "2026-05-07",
+      "_note": "Cost-efficient variant of GPT-5. Tagged frontier per task spec because it is part of the GPT-5 family release wave."
+    },
+    {
+      "id": "claude-opus-4-7",
+      "display_name": "Claude Opus 4.7",
+      "provider": "anthropic",
+      "tier_class": "frontier",
+      "input_price_per_1m": 5.00,
+      "output_price_per_1m": 25.00,
+      "context_window_tokens": 1000000,
+      "source_url": "https://platform.claude.com/docs/en/docs/about-claude/pricing",
+      "fetched_at": "2026-05-07",
+      "_note": "Significant price drop vs Opus 4 / 4.1 ($15 / $75). 1M-token context at standard rate. Note: Opus 4.7 uses a new tokenizer that may consume up to 35% more tokens for the same text."
+    },
+    {
+      "id": "claude-sonnet-4-6",
+      "display_name": "Claude Sonnet 4.6",
+      "provider": "anthropic",
+      "tier_class": "frontier",
+      "input_price_per_1m": 3.00,
+      "output_price_per_1m": 15.00,
+      "context_window_tokens": 1000000,
+      "source_url": "https://platform.claude.com/docs/en/docs/about-claude/pricing",
+      "fetched_at": "2026-05-07",
+      "_note": "Successor to Sonnet 4.5 at same per-token price. 1M-token context at standard rate. Fast mode (beta) for Opus 4.6 is 6x; not applicable to Sonnet."
+    },
+    {
+      "id": "gemini-3-pro",
+      "display_name": "Gemini 3 Pro (preview)",
+      "provider": "google",
+      "tier_class": "frontier",
+      "input_price_per_1m": 2.00,
+      "output_price_per_1m": 12.00,
+      "context_window_tokens": "tbd",
+      "source_url": "https://ai.google.dev/pricing",
+      "fetched_at": "2026-05-07",
+      "_note": "Listed as gemini-3.1-pro-preview on the Google pricing page. Standard tier for prompts ≤200k. Prompts >200k are $4.00 input / $18.00 output per 1M. Context window not explicitly stated on the pricing page."
+    },
+    {
+      "id": "gemini-3-flash",
+      "display_name": "Gemini 3 Flash (preview)",
+      "provider": "google",
+      "tier_class": "frontier",
+      "input_price_per_1m": 0.50,
+      "output_price_per_1m": 3.00,
+      "context_window_tokens": "tbd",
+      "source_url": "https://ai.google.dev/pricing",
+      "fetched_at": "2026-05-07",
+      "_note": "Listed as gemini-3-flash-preview. Audio input is $1.00/1M. Context window not explicitly stated on the pricing page."
+    }
+  ]
+}

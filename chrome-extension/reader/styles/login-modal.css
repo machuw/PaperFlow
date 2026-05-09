@@ -1,0 +1,205 @@
+/* LoginModal · spec §10.1 + §14.1 */
+.login-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(28, 26, 21, 0.32);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  animation: fade-up 120ms ease-out;
+}
+
+.login-modal-panel {
+  width: 450px; max-width: 100%;
+  background: var(--paper-soft);
+  border: 0.5px solid var(--rule);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-2);
+  padding: 24px 28px;
+  font-family: var(--font-serif);
+  color: var(--ink);
+}
+
+.login-modal-label {
+  font-family: var(--font-mono);
+  font-size: var(--t-xxs);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  margin-bottom: 8px;
+}
+
+.login-modal-headline {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.login-modal-subhead {
+  font-size: var(--t-sm);
+  color: var(--ink-soft);
+  margin: 4px 0 0 0;
+  line-height: 1.5;
+}
+
+.login-modal-google {
+  display: block; width: 100%;
+  padding: 10px 16px;
+  margin-top: 20px;
+  background: var(--paper);
+  border: 0.5px solid var(--rule);
+  border-radius: var(--r-md);
+  font-size: var(--t-md);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background 80ms ease-out;
+}
+.login-modal-google:hover:not(:disabled) { background: var(--paper-deep); }
+.login-modal-google:disabled { opacity: 0.5; cursor: default; }
+
+.login-modal-divider {
+  display: flex; align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: var(--t-xxs);
+  color: var(--ink-faded);
+  font-family: var(--font-mono);
+}
+.login-modal-divider::before,
+.login-modal-divider::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: var(--rule);
+}
+
+.login-modal-email-row,
+.login-modal-otp-row {
+  display: flex;
+  gap: 6px;
+}
+
+.login-modal-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 0.5px solid var(--rule);
+  border-radius: var(--r-md);
+  font-size: var(--t-sm);
+  background: var(--paper);
+  font-family: var(--font-sans);
+  color: var(--ink);
+}
+.login-modal-input:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 2px;
+}
+
+.login-modal-send-btn,
+.login-modal-verify-btn {
+  padding: 8px 12px;
+  background: var(--walnut);
+  color: var(--paper-soft);
+  border: none;
+  border-radius: var(--r-md);
+  font-size: var(--t-sm);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.login-modal-send-btn:disabled,
+.login-modal-verify-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.login-modal-error {
+  margin-top: 10px;
+  color: var(--foxglove);
+  font-size: var(--t-xs);
+  font-family: var(--font-sans);
+}
+
+.login-modal-byok-escape {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 0.5px solid var(--rule);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: var(--t-xs);
+  font-family: var(--font-sans);
+}
+
+.login-modal-byok-escape > span { color: var(--ink-faded); }
+
+.login-modal-skip {
+  color: var(--walnut);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.login-modal-skip:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* OTP step: back link above the title. */
+.login-modal-back {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-family: var(--font-sans);
+  font-size: var(--t-sm);
+  color: var(--ink-faded);
+  cursor: pointer;
+  user-select: none;
+}
+.login-modal-back:hover { color: var(--walnut); }
+.login-modal-back:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* OTP step: spam-folder hint sits between "sent to {email}" and the OTP input.
+   Tone is muted (one rung above ink-faded) — informational, not error-state. */
+.login-modal-spam-hint {
+  margin: 8px 0 0 0;
+  font-size: var(--t-xs);
+  color: var(--ink-faded);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+/* OTP step: resend button — secondary style (vs primary verify button). */
+.login-modal-resend-btn {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: transparent;
+  color: var(--walnut);
+  border: 0.5px solid var(--rule);
+  border-radius: var(--r-md);
+  font-size: var(--t-sm);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background 80ms ease-out;
+}
+.login-modal-resend-btn:hover:not(:disabled) { background: var(--paper-deep); }
+.login-modal-resend-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  color: var(--ink-faded);
+}
+
+@media (max-width: 500px) {
+  .login-modal-panel {
+    width: 100vw;
+    max-width: none;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    height: 100vh;
+    padding: 32px 20px;
+  }
+}

@@ -1,0 +1,84 @@
+/* ChurnModal · spec §14.3.3.1 — Pro→Free downgrade one-shot notice */
+
+.churn-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(28, 26, 21, 0.32);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  animation: fade-up 120ms ease-out;
+}
+
+.churn-modal-panel {
+  width: 450px; max-width: 100%;
+  background: var(--paper-soft);
+  border: 0.5px solid var(--rule);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-2);
+  padding: 24px 28px;
+  font-family: var(--font-serif);
+  color: var(--ink);
+}
+
+.churn-modal-title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.churn-modal-body {
+  font-size: var(--t-sm);
+  color: var(--ink-soft);
+  margin: 8px 0 20px 0;
+  line-height: 1.5;
+}
+
+.churn-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.churn-modal-restore {
+  padding: 8px 14px;
+  background: var(--walnut);
+  color: var(--paper-soft);
+  border: none;
+  border-radius: var(--r-md);
+  font-size: var(--t-sm);
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+.churn-modal-restore:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 2px;
+}
+
+.churn-modal-later {
+  padding: 8px 14px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 0.5px solid var(--rule);
+  border-radius: var(--r-md);
+  font-size: var(--t-sm);
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+.churn-modal-later:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 2px;
+}
+
+@media (max-width: 500px) {
+  .churn-modal-panel {
+    width: 100vw;
+    max-width: none;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    height: 100vh;
+    padding: 32px 20px;
+  }
+}

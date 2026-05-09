@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# post-checkout — auto-bootstrap a fresh git worktree.
+#
+# Git fires this hook after `git worktree add ...` (and after every
+# `git checkout`). The 4th positional arg distinguishes the calls:
+#   $1 — previous HEAD
+#   $2 — new HEAD
+#   $3 — flag: 1 if branch checkout, 0 if file checkout
+#   GIT_REFLOG_ACTION=worktree (env) — set during `git worktree add`
+#
+# We bootstrap chrome-extension/node_modules ONLY on a fresh worktree
+# (when its node_modules is empty). For a normal `git checkout` in the
+# main worktree the dir already has node_modules and `npm ci` would be
+# a no-op but still slow — skip it.
+
+set -euo pipefail
+
+prev_head="$1"
+new_head="$2"
+branch_flag="$3"
+
+# Only act on branch checkouts (skip file checkouts).
+[ "$branch_flag" = "1" ] || exit 0
+
+# Find the repo root (this script may run from a worktree).
+repo_root="$(git rev-parse --show-toplevel)"
+ext_dir="$repo_root/chrome-extension"
+
+# Bootstrap only if chrome-extension exists and node_modules is empty/missing.
+[ -d "$ext_dir" ] || exit 0
+if [ -d "$ext_dir/node_modules" ] && [ -n "$(ls -A "$ext_dir/node_modules" 2>/dev/null)" ]; then
+  exit 0
+fi
+
+# Fresh worktree detected.
+echo "[post-checkout] fresh worktree at $repo_root — running scripts/worktree-init.sh"
+bash "$repo_root/scripts/worktree-init.sh"

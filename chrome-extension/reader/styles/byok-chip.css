@@ -1,0 +1,281 @@
+/* byok-chip.css — Phase 13 (UI-01)
+ *
+ * Chip + popover + inline health dot for the top-bar BYOK selector.
+ * Extends the quota-chip pill pattern (quota-chip.css) and the
+ * account-menu-panel popover pattern (account-menu.css).
+ *
+ * Inheritance exceptions documented per UI-SPEC §Spacing Inheritance
+ * Exceptions: 5px dot, 6px popover top offset, 10px chip horizontal
+ * padding, 14px row inner padding (visual), 26px chip min-height.
+ * Do not round these to 4-multiples.
+ *
+ * Token reserve budgets (UI-SPEC §Color §Accent reserved-for):
+ *   --walnut: focus ring + +New border + radio active fill (≤6 hits)
+ *   --forest: healthy dot + active row left-border + active row tint (3)
+ *   --amber:  unreachable dot + banner bg/text/border (4)
+ *   --foxglove: NOT used here (popover has no destructive button)
+ */
+
+/* Anchor wrapper (mirrors .account-menu-anchor) */
+.byok-chip-anchor {
+  position: relative;
+}
+
+/* Chip pill — default state */
+.byok-chip {
+  min-height: 26px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  background: var(--paper-soft);
+  border: 0.5px solid var(--rule);
+  color: var(--ink-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 120ms ease, color 120ms ease;
+}
+.byok-chip:hover {
+  background: var(--paper-deep);
+  color: var(--ink);
+}
+.byok-chip[data-state="active"] {
+  background: var(--paper-deep);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: var(--shadow-1);
+}
+.byok-chip[data-state="empty"] {
+  border: 0.5px dashed var(--rule);
+  color: var(--ink-faded);
+}
+.byok-chip:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 2px;
+}
+.byok-chip-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.byok-chip-chevron {
+  flex-shrink: 0;
+  color: var(--ink-faded);
+  margin-left: 4px;
+}
+
+/* Inline health dot — chip + popover row variants share */
+.byok-chip-dot,
+.byok-popover-row-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.byok-chip-dot[data-health="healthy"],
+.byok-popover-row-dot[data-health="healthy"] {
+  background: var(--forest);
+}
+.byok-chip-dot[data-health="unreachable"],
+.byok-popover-row-dot[data-health="unreachable"] {
+  background: var(--amber);
+}
+
+/* Popover panel */
+.byok-popover-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 280px;
+  max-width: 320px;
+  max-height: 320px;
+  background: var(--paper-soft);
+  border: 0.5px solid var(--rule);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-2);
+  padding: 12px;
+  overflow: hidden;
+  z-index: 50;
+  animation: fade-up 120ms ease-out;
+  display: flex;
+  flex-direction: column;
+}
+.byok-popover-heading {
+  font-family: var(--font-mono);
+  font-size: var(--t-xxs);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  margin-bottom: 8px;
+}
+
+/* Unreachable banner */
+.byok-popover-banner {
+  background: var(--amber-soft);
+  color: var(--amber);
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 0.5px solid var(--amber);
+  margin-bottom: 8px;
+  font-size: var(--t-xs);
+  font-weight: 500;
+  line-height: 1.4;
+}
+.byok-popover-banner-link {
+  color: var(--amber);
+  text-decoration: underline;
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Scrollable list */
+.byok-popover-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 200px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* Row — <li role="menuitemradio"> (C-2 a11y fix: was <button>; now <li>
+   with tabIndex=0 + keyDown handler for Space/Enter; sibling edit <button>
+   lives inside the same <li> so we no longer have button-inside-button) */
+.byok-popover-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background 80ms ease;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+}
+.byok-popover-row:hover {
+  background: var(--paper-deep);
+}
+.byok-popover-row[aria-checked="true"] {
+  background: color-mix(in oklch, var(--forest) 8%, transparent);
+  border-left: 2px solid var(--forest);
+  padding-left: 8px;
+}
+.byok-popover-row:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: -2px;
+}
+.byok-popover-row-radio {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--rule);
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.byok-popover-row[aria-checked="true"] .byok-popover-row-radio {
+  border-color: var(--walnut);
+}
+.byok-popover-row[aria-checked="true"] .byok-popover-row-radio::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--walnut);
+}
+.byok-popover-row-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.byok-popover-row-name {
+  font-size: var(--t-xs);
+  font-weight: 500;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.byok-popover-row-detail {
+  font-family: var(--font-mono);
+  font-size: var(--t-xxs);
+  color: var(--ink-faded);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.byok-popover-row-edit {
+  opacity: 0;
+  transition: opacity 80ms ease;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--ink-faded);
+  flex-shrink: 0;
+}
+.byok-popover-row:hover .byok-popover-row-edit {
+  opacity: 0.6;
+}
+.byok-popover-row-edit:hover {
+  opacity: 1;
+}
+
+/* Sticky CTA region */
+.byok-popover-cta {
+  border-top: 0.5px solid var(--rule-soft);
+  padding-top: 8px;
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.byok-popover-cta-new {
+  padding: 6px 12px;
+  background: transparent;
+  border: 0.5px dashed var(--walnut);
+  color: var(--walnut);
+  border-radius: var(--r-sm);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+.byok-popover-cta-new:hover {
+  background: color-mix(in oklch, var(--walnut) 8%, transparent);
+}
+.byok-popover-cta-manage {
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  color: var(--ink-soft);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+.byok-popover-cta-manage:hover {
+  color: var(--ink);
+}

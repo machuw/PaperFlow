@@ -1,0 +1,63 @@
+{
+  "version": "baseline-2026-05-07",
+  "_warning": "BASELINE assumptions only. Revise after Component B (ai-proxy token capture) accumulates ~2 weeks of real production data, then re-run scripts/ai-cost-analysis.mjs and update this file.",
+  "_source_evidence": "Token estimates anchored on (a) ai-proxy/index.ts:16 comment 'chat embeds full paper + history → 5–15K tokens', (b) typical academic paper length 8–15K tokens after parsing, (c) common prompt-template overhead.",
+  "calls_per_month_pro": 30000,
+  "kinds": [
+    {
+      "kind": "chat",
+      "prompt_tokens": 8000,
+      "output_tokens": 1500,
+      "_rationale": "ai-proxy/index.ts:16 注 'chat embeds full paper + history → 5–15K tokens' — 取中位 8K 输入；输出按 Q&A 风格 ~1.5K 一段回答"
+    },
+    {
+      "kind": "summary",
+      "prompt_tokens": 12000,
+      "output_tokens": 2000,
+      "_rationale": "full paper 全文（典型 10–14K parsed tokens）+ system prompt → 12K input；输出结构化摘要（abstract/methods/findings）~2K"
+    },
+    {
+      "kind": "explain",
+      "prompt_tokens": 4000,
+      "output_tokens": 500,
+      "_rationale": "selection（1–2 段）+ 2–3 段上下文 + system prompt → ~4K input；输出 terse 解释 ~500 tokens"
+    },
+    {
+      "kind": "translate",
+      "prompt_tokens": 2000,
+      "output_tokens": 2000,
+      "_rationale": "翻译按定义 input ≈ output；典型选区 1–2 段 ~2K 双向"
+    },
+    {
+      "kind": "overview",
+      "prompt_tokens": 10000,
+      "output_tokens": 1500,
+      "_rationale": "library-level 跨论文综述：多论文摘要拼接 ~10K input；输出综合段落 ~1.5K"
+    }
+  ],
+  "kind_distribution": {
+    "_source": "Guess based on app-level UX (chat is the primary interaction surface). Revise after telemetry — ai_usage_log.kind aggregation will give the real distribution.",
+    "chat": 0.55,
+    "explain": 0.20,
+    "summary": 0.15,
+    "translate": 0.05,
+    "overview": 0.05
+  },
+  "alternative_distributions": {
+    "_purpose": "Sensitivity analysis inputs for scripts/ai-cost-analysis.mjs — pass --workload-distribution=summary-heavy etc.",
+    "chat-heavy": {
+      "chat": 0.75,
+      "explain": 0.15,
+      "summary": 0.05,
+      "translate": 0.025,
+      "overview": 0.025
+    },
+    "summary-heavy": {
+      "chat": 0.25,
+      "explain": 0.15,
+      "summary": 0.45,
+      "translate": 0.05,
+      "overview": 0.10
+    }
+  }
+}
