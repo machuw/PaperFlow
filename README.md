@@ -68,8 +68,6 @@ Then **Load unpacked** the `chrome-extension/dist/` folder via `chrome://extensi
 3. Select a passage → the floating toolbar appears → press `T` to translate, `E` to explain
 4. Press `⌘L` to add the paper to your library and `⌘K` to search across everything
 
-For login, cross-device sync, and BYOK setup, see [`docs/specs/2026-04-24-spec-user-login.md`](docs/specs/2026-04-24-spec-user-login.md).
-
 ## 🏗️ Architecture
 
 ```
@@ -103,7 +101,7 @@ For login, cross-device sync, and BYOK setup, see [`docs/specs/2026-04-24-spec-u
 
 Three subscription tiers: **Free** (BYOK only) · **Sync** (cloud library) · **Pro** (managed AI quotas).
 
-For deeper architecture notes, see [`CLAUDE.md`](CLAUDE.md) and [`DESIGN.md`](DESIGN.md).
+For deeper architecture notes, see [`CLAUDE.md`](CLAUDE.md).
 
 ## 🛠️ Development
 
@@ -193,14 +191,10 @@ PaperFlow/
 │   ├── functions/       # Edge Functions (ai-proxy, stripe-webhook, …)
 │   └── config.toml
 ├── docs/
-│   ├── specs/           # Feature specs (中文)
-│   ├── plans/           # Implementation plans
-│   ├── reviews/         # Code / design reviews
 │   ├── prototype/       # Archived no-bundler React prototype (UI reference)
 │   └── assets/          # README assets
 ├── scripts/             # Build / release helpers
 ├── CLAUDE.md            # Detailed contributor guide
-├── DESIGN.md            # Design rationale
 └── README.md            # ← you are here
 ```
 

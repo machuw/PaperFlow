@@ -70,8 +70,6 @@ npm run build         # 生产构建 → dist/
 3. 划选段落 → 浮动工具栏出现 → 按 `T` 翻译，按 `E` 解释
 4. 按 `⌘L` 把当前论文加进库，按 `⌘K` 跨论文搜索
 
-登录、跨设备同步、BYOK 配置详见 [`docs/specs/2026-04-24-spec-user-login.md`](docs/specs/2026-04-24-spec-user-login.md)。
-
 ## 🏗️ 架构
 
 ```
@@ -105,7 +103,7 @@ npm run build         # 生产构建 → dist/
 
 三档订阅：**Free**（仅 BYOK）· **Sync**（云端库）· **Pro**（托管 AI 配额）。
 
-更深入的架构说明见 [`CLAUDE.md`](CLAUDE.md) 和 [`DESIGN.md`](DESIGN.md)。
+更深入的架构说明见 [`CLAUDE.md`](CLAUDE.md)。
 
 ## 🛠️ 开发
 
@@ -195,14 +193,10 @@ PaperFlow/
 │   ├── functions/       # Edge Functions（ai-proxy / stripe-webhook / ...）
 │   └── config.toml
 ├── docs/
-│   ├── specs/           # 功能 spec（中文）
-│   ├── plans/           # 实现计划
-│   ├── reviews/         # 代码 / 设计 review
 │   ├── prototype/       # 已归档的 no-bundler React 原型（UI 参考）
 │   └── assets/          # README 资源
 ├── scripts/             # 构建 / 发版脚本
 ├── CLAUDE.md            # 详细贡献者指南
-├── DESIGN.md            # 设计决策记录
 └── README.md            # ← 你正在看这个
 ```
 

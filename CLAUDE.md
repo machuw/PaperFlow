@@ -26,6 +26,8 @@ PaperFlow-Design/
 
 ## Document Language
 
+Generated docs under `docs/` (specs, plans, reviews) are written in Chinese. Code, code comments, commit messages, and this file (`CLAUDE.md`) are in English.
+
 ## Running the archived prototype
 
 The prototype under `docs/prototype/` is kept as a UI reference. It is **not** built or shipped — for current behaviour, run the extension. To open the prototype:
@@ -105,70 +107,84 @@ Then `git worktree add ...` triggers `.githooks/post-checkout`, which calls `scr
 
 ## Releasing the extension (zip + load unpacked)
 
-公司内部 / 朋友试用的发版流程。同事拿到 zip 后通过 `chrome://extensions/` → 开发者模式 → "Load unpacked" 安装。**不走 Chrome Web Store**，也不走 `.crx` 自托管（MV3 下非 Web Store 的 .crx 默认会被禁用，除非配 enterprise policy，对内部小团队不划算）。
+Release flow for internal / friends-and-family distribution. Recipients install the zip via `chrome://extensions/` → Developer mode → "Load unpacked". **Not shipped to the Chrome Web Store**, and not via self-hosted `.crx` either (under MV3, non-Web-Store `.crx` is disabled by default unless an enterprise policy is configured — not worth it for a small internal team).
 
 ```bash
 cd chrome-extension
-npm run bump patch      # 0.1.0 → 0.1.1（也可用 minor / major / 显式 x.y.z）
+npm run bump patch      # 0.1.0 → 0.1.1 (also accepts minor / major / explicit x.y.z)
 npm run release         # → chrome-extension/paperflow-v{version}.zip
 git push && git push v{version}
 ```
 
 ### `npm run bump <patch|minor|major|x.y.z>` (`scripts/bump.mjs`)
 
-- 同步 `manifest.json` + `package.json` 的 `version` 字段
-- `git commit manifest.json package.json -m "chore: bump version to v{version}"`（pathspec 形式，**不会**把其他未提交改动一起带进去）
-- 打 tag `v{version}`
-- 两文件版本若已不同步、或当前不是合法 semver、或参数非法 → 退出
-- 不在 git 仓库时跳过 commit/tag，只改文件
+- Syncs the `version` field in `manifest.json` and `package.json`
+- `git commit manifest.json package.json -m "chore: bump version to v{version}"` (pathspec form — **does not** sweep up other uncommitted changes)
+- Tags `v{version}`
+- Exits if the two files are out of sync, the current version isn't valid semver, or the argument is invalid
+- If not inside a git repo, only edits the files; skips commit/tag
 
 ### `npm run release` (`scripts/release.sh`)
 
-- 强制 `rm -rf dist`，然后 `npm run build`（生产模式，hosted Supabase）
-- `manifest.json` 与 `package.json` 版本不一致 → 退出
-- `dist/assets/` 里 grep 到本地 Supabase URL `127.0.0.1:54321` → 退出（说明是 `build:dev` 输出）
-- `dist/manifest.json` 或 `dist/icons/` 缺失 → 退出
-- zip `dist/` → `paperflow-v{version}.zip`（已 gitignored，**不要**提交 artifact）
+- Forces `rm -rf dist`, then `npm run build` (production mode, hosted Supabase)
+- Exits if `manifest.json` and `package.json` versions disagree
+- Exits if `dist/assets/` greps positive for the local Supabase URL `127.0.0.1:54321` (means a `build:dev` artifact slipped through)
+- Exits if `dist/manifest.json` or `dist/icons/` is missing
+- Zips `dist/` → `paperflow-v{version}.zip` (gitignored — **do not** commit the artifact)
 
-### 安装步骤（发给同事的话术）
+### Install steps (to share with recipients)
 
-1. 解压 `paperflow-v{version}.zip`
-2. 打开 `chrome://extensions/`
-3. 右上角开"开发者模式 / Developer mode"
-4. 点"加载已解压的扩展程序 / Load unpacked"，选解压后的文件夹
+1. Unzip `paperflow-v{version}.zip`
+2. Open `chrome://extensions/`
+3. Toggle "Developer mode" in the top-right
+4. Click "Load unpacked", select the unzipped folder
 
-Chrome 启动时会有黄条警告 "disable developer mode extensions" — 这是非 Web Store 安装的正常提示，可关掉。
+Chrome will show a yellow banner "disable developer mode extensions" on startup — this is the standard non-Web-Store install warning, safe to dismiss.
 
-### Artifact 托管
+### Artifact hosting
 
-zip 文件不进 git。挂到内网共享 / GitHub Release / S3 / 公司云盘等地方让同事下载。tag 推上去后可以用 GitHub Release UI 把 zip 附加到对应 tag 上。
+Zip files do not go into git. Distribute via internal share / GitHub Release / S3 / company drive. After pushing the tag, you can use the GitHub Release UI to attach the zip to the corresponding tag.
 
-## 双仓策略：私有开发 + 公开镜像
+## Dual-repo strategy: private development + public mirror
 
-仓库分两边：
+The repo lives on both sides:
 
-| 仓 | 用途 | 包含 |
+| Repo | Purpose | Contents |
 |---|---|---|
-| **`machuw/PaperFlow-Design`**（私有，本地 origin） | 全保真开发 | 所有内容，包括 `.planning/`、`.superpowers/`、内部 runbook、真实 Supabase ref |
-| **`machuw/PaperFlow`**（公开） | 开源镜像 | 仅 tracked code + docs/、scripts/，已 scrub 真实 ref |
+| **`machuw/PaperFlow-Design`** (private, local origin) | Full-fidelity development | Everything, including `.planning/`, `.superpowers/`, internal runbooks, real Supabase ref |
+| **`machuw/PaperFlow`** (public) | Open-source mirror | Tracked code + `docs/` + `scripts/` only, with the real ref scrubbed |
 
-公开仓是 snapshot 镜像 —— 每次 sync 一个 commit，**不带历史**、不带内部规划文档。私有仓继续走 PR-per-phase 流程；公开仓只在你想发布时手动同步。
+The public repo is a snapshot mirror — one commit per sync, **no history carried over**, no internal planning docs. The private repo continues with PR-per-phase; the public repo only updates when you manually sync.
 
 ```bash
-# 私有仓有新进展、想公开时
-bash scripts/sync-public.sh             # 真同步
-bash scripts/sync-public.sh --dry-run   # 看 diff 不 push
+# When the private repo has new progress and you want to publish
+bash scripts/sync-public.sh                      # code only
+bash scripts/sync-public.sh --dry-run            # show diff, don't push
+bash scripts/sync-public.sh --release            # code + release (uses manifest current version)
+bash scripts/sync-public.sh --release v0.1.3     # code + explicit version (also for back-publishing older versions)
+bash scripts/sync-public.sh --dry-run --release  # run all pre-flight, show what would happen, change nothing
 ```
 
-`scripts/sync-public.sh` 的过滤规则（仅 tracked 文件、已自动排除 `.env*`/`dist.pem`/`node_modules`/`paperflow-v*.zip`/`AGENTS.md`/`.agents/` 等所有 gitignored 内容）：
+**Deciding whether to release**: the script does not decide for you. After a plain sync, it will passively warn "manifest = vX, public has no release for it, the zip exists" — you decide whether to re-run with `--release`.
 
-- 排除目录：`.planning/`、`.superpowers/`
-- 文本替换：真实 Supabase project ref → `<ref>` 占位符
-- 安全网：commit 前 grep 校验 leak pattern，命中即 abort
+**The 4 pre-flight checks under `--release`** (any failure aborts before touching the mirror):
 
-镜像 checkout 在 `.public-mirror/`（gitignored，可随时删，下次 sync 会重 clone）。
+1. `chrome-extension/paperflow-v{X}.zip` exists
+2. The zip is a production build (grep for `127.0.0.1:54321` returns no hits)
+3. The zip's internal `manifest.json` `version` field matches the filename
+4. The public repo has no release for `v{X}`
 
-如果以后增加新的敏感模式（比如换了真实 ref、加了新 Stripe price ID），改 `scripts/sync-public.sh` 顶部的 `SUPABASE_REF` / `LEAK_PATTERNS` 即可。
+Release notes use a hardcoded install template baked into the script (English/Chinese README links + issue link), identical every time. To automate the changelog later, add `CHANGELOG.md` to the repo root and update the script to read its top section.
+
+`scripts/sync-public.sh` filtering (tracked files only — `.env*` / `dist.pem` / `node_modules` / `paperflow-v*.zip` / `AGENTS.md` / `.agents/` and other gitignored content are auto-excluded):
+
+- Excluded directories: `.planning/`, `.superpowers/`
+- Text replacement: real Supabase project ref → `<ref>` placeholder
+- Safety net: pre-commit grep for known leak patterns; aborts on hit
+
+The mirror checkout lives at `.public-mirror/` (gitignored, deletable at any time — the next sync will re-clone).
+
+If you ever add new sensitive patterns (a new project ref, a new Stripe price ID, etc.), update `SUPABASE_REF` / `LEAK_PATTERNS` at the top of `scripts/sync-public.sh`.
 
 ## Architecture (archived prototype, `docs/prototype/`)
 
@@ -231,44 +247,44 @@ All generated docs go under `docs/`, organized by type:
 
 ## Testing
 
-E2E 测试统一用 **Playwright CLI**（`npx playwright test`），不要使用 Playwright MCP（`mcp__...__playwright__*`）工具。CLI 跑出来的 spec 是可入库、可在 CI 跑、可 diff、可复现的持久化产物；MCP 只是当前会话内的一次性浏览器操作，留不下产物，且每次重跑都要消耗对话上下文。
+E2E tests use the **Playwright CLI** (`npx playwright test`) — do not use the Playwright MCP tools (`mcp__...__playwright__*`). The CLI produces persistent specs that live in the repo, run in CI, diff cleanly, and replay reproducibly. MCP is only a one-shot, in-session browser action — it leaves no artifact and burns conversation context on every re-run.
 
-新的 E2E 用例放进 `chrome-extension/tests/e2e/`。只在需要单次手动探索（截一张图、确认某个具体页面状态）且明显不值得写成持久化用例时，才考虑 MCP。
+New E2E cases go in `chrome-extension/tests/e2e/`. Only reach for MCP when you need a single manual exploration (capture a screenshot, confirm a specific page state) and clearly don't want a persistent test for it.
 
-### SPEC §8 / 验收 / 手测 checklist —— 默认自动跑
+### SPEC §8 / acceptance / manual-test checklist — automate by default
 
-收尾阶段的 acceptance / smoke checklist（典型例子：SPEC §8 多项验收、Phase D 手测列表）**默认用 `playwright-cli` skill 自动跑完**，不要把它当成"用户的活"打包推给对方。验证完整闭环（chrome.storage seed → 触发 UI → 断言结果）只需要几分钟。
+End-of-phase acceptance / smoke checklists (typical examples: SPEC §8 acceptance items, Phase D manual-test lists) **default to running automatically via the `playwright-cli` skill** — don't bundle them up as "user homework" and toss them over the wall. A complete loop (chrome.storage seed → trigger UI → assert result) only takes a few minutes.
 
-执行套路（已在 Phase 27 D2 验证）：
+Standard playbook (validated in Phase 27 D2):
 
 ```bash
-# 1) 干净 dev build（incremental 经常跳过 reader 当 tsx mtime 早于 dist）
+# 1) Clean dev build (incremental often skips reader when tsx mtime is older than dist)
 cd chrome-extension && rm -rf dist node_modules/.vite && npm run build:dev
 
-# 2) 起带扩展的 chromium（CDP 9333 + 持久 profile + auto load extension）
+# 2) Launch extension-loaded chromium (CDP 9333 + persistent profile + auto-load extension)
 nohup node scripts/pf-launch.cjs > /tmp/pf-launch.log 2>&1 &
 
-# 3) attach playwright-cli + 打开 reader
+# 3) Attach playwright-cli + open the reader
 npx --no-install playwright-cli attach --cdp=http://localhost:9333
 npx --no-install playwright-cli goto "chrome-extension://<id>/reader/index.html?e2e=fake-paper"
 
-# 4) seed 状态 + 跑场景
+# 4) Seed state + run the scenario
 npx --no-install playwright-cli eval "(async () => { await chrome.storage.local.set({...}); })()"
 npx --no-install playwright-cli press "Meta+l"
 npx --no-install playwright-cli click eXX
-npx --no-install playwright-cli tab-list   # 验证多 tab 行为
-npx --no-install playwright-cli --raw eval "document.querySelector(...)"  # 断言 hydration
+npx --no-install playwright-cli tab-list   # verify multi-tab behavior
+npx --no-install playwright-cli --raw eval "document.querySelector(...)"  # assert hydration
 ```
 
-注意点：
+Gotchas:
 
-- **每次开测前确认 build mode**：`playwright-cli console | grep "supabase env"` 应该看到 `http://127.0.0.1:54321 · development`。看到 `production` 就是 dist 没重建对，回 step 1。
-- **改动 reader 源码后必须 `rm -rf dist node_modules/.vite` 强制重建**，再 kill + relaunch chromium。Vite incremental 经常假装重建（"1 modules transformed" 只编译了 `inject.js`，reader bundle 没动）。
-- **toast / 异步 UI 时序敏感**：toast 默认 2.6s auto-dismiss + drawer overlay 可能遮挡。读取 toast 文本要在 click 后 < 1s 内，必要时先 `press Escape` 关 drawer。
-- **复用 `chrome-extension/scripts/pf-launch.cjs`**（Phase 27 引入的 debug helper），不要每次现写 launch 脚本。
-- **不能因为"需要真实网络 / 真实论文"就跳过自动化**——绝大多数验收项可以靠 `chrome.storage.local` seed + 缓存 fallback 路径完整覆盖（`#paperKey=<key>` 入口走纯缓存渲染，零网络）。
+- **Confirm build mode before every test session**: `playwright-cli console | grep "supabase env"` should show `http://127.0.0.1:54321 · development`. Seeing `production` means dist wasn't rebuilt correctly — go back to step 1.
+- **After editing reader source you MUST `rm -rf dist node_modules/.vite` to force a rebuild**, then kill + relaunch chromium. Vite incremental often fakes a rebuild ("1 modules transformed" only compiled `inject.js`, the reader bundle didn't move).
+- **Toast / async UI is timing-sensitive**: toasts auto-dismiss at 2.6s by default and the drawer overlay can occlude. Read toast text within < 1s of the click; press `Escape` to close the drawer first if needed.
+- **Reuse `chrome-extension/scripts/pf-launch.cjs`** (the debug helper introduced in Phase 27); don't hand-roll a launch script every time.
+- **Don't skip automation just because "it needs real network / a real paper"** — the vast majority of acceptance items can be fully covered via `chrome.storage.local` seed + cache-fallback paths (`#paperKey=<key>` entry uses pure cache rendering with zero network).
 
-发现 bug 直接顺手 patch + commit 一条 fix（Phase 27 D2 顺路捕获 + 修了 `toast.tsx` 长期 latent 的 `action!` 谎报 bug）。
+If you find a bug along the way, just patch + commit a fix in the same pass (Phase 27 D2 incidentally caught + fixed the long-latent `action!` false-report bug in `toast.tsx`).
 
 ## Auth + Sync (Supabase + Stripe)
 
