@@ -143,6 +143,41 @@ npm run typecheck      # tsc --noEmit
 
 The full contributor guide lives in [`CLAUDE.md`](CLAUDE.md).
 
+## 📦 Packaging for distribution
+
+To hand the extension to non-developers (no local Supabase, no Node toolchain), build a **production-only zip** they can *Load unpacked*. PaperFlow is not on the Chrome Web Store, so this is the standard distribution path.
+
+```bash
+cd chrome-extension
+
+# 1. Bump the version (syncs manifest.json + package.json, commits, tags v{version})
+npm run bump patch              # or: minor | major | 1.2.3
+
+# 2. Build production bundle and zip it
+npm run release                 # → chrome-extension/paperflow-v{version}.zip
+
+# 3. Push the commit and the tag
+git push && git push --tags
+```
+
+What `npm run release` (`scripts/release.sh`) does:
+
+- Forces a clean `npm run build` (production mode → hosted Supabase). **Never zips a dev build.**
+- Refuses to continue if it detects the local Supabase URL `127.0.0.1:54321` inside `dist/assets/` (catches accidental `build:dev` output).
+- Refuses to continue if `manifest.json` and `package.json` versions disagree.
+- Zips `dist/` → `paperflow-v{version}.zip` at the repo root of `chrome-extension/`.
+
+The zip is gitignored — **don't commit the artifact**. Upload it to a GitHub Release (attach to the `v{version}` tag), internal share, or cloud drive.
+
+### Install instructions to send with the zip
+
+1. Unzip `paperflow-v{version}.zip` to a stable folder on disk
+2. Open `chrome://extensions/` and enable **Developer mode** (top right)
+3. Click **Load unpacked** and select the unzipped folder
+4. Visit any [`arxiv.org/abs/...`](https://arxiv.org/) page
+
+Chrome will show a yellow "disable developer mode extensions" bar on each launch — that's the expected warning for non-Web-Store installs and can be dismissed.
+
 ## 📂 Project Structure
 
 ```

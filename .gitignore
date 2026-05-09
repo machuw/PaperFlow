@@ -20,3 +20,6 @@ SUPABASE.md
 # Local editor / tool workspaces — not relevant to repo
 .claudian/
 .obsidian/
+
+# Public mirror checkout used by scripts/sync-public.sh
+.public-mirror/

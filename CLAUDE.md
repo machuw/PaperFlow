@@ -25,7 +25,6 @@ PaperFlow-Design/
 ```
 
 ## Document Language
-输出的文档都使用中文
 
 ## Running the archived prototype
 
@@ -143,6 +142,33 @@ Chrome 启动时会有黄条警告 "disable developer mode extensions" — 这�
 ### Artifact 托管
 
 zip 文件不进 git。挂到内网共享 / GitHub Release / S3 / 公司云盘等地方让同事下载。tag 推上去后可以用 GitHub Release UI 把 zip 附加到对应 tag 上。
+
+## 双仓策略：私有开发 + 公开镜像
+
+仓库分两边：
+
+| 仓 | 用途 | 包含 |
+|---|---|---|
+| **`machuw/PaperFlow-Design`**（私有，本地 origin） | 全保真开发 | 所有内容，包括 `.planning/`、`.superpowers/`、内部 runbook、真实 Supabase ref |
+| **`machuw/PaperFlow`**（公开） | 开源镜像 | 仅 tracked code + docs/、scripts/，已 scrub 真实 ref |
+
+公开仓是 snapshot 镜像 —— 每次 sync 一个 commit，**不带历史**、不带内部规划文档。私有仓继续走 PR-per-phase 流程；公开仓只在你想发布时手动同步。
+
+```bash
+# 私有仓有新进展、想公开时
+bash scripts/sync-public.sh             # 真同步
+bash scripts/sync-public.sh --dry-run   # 看 diff 不 push
+```
+
+`scripts/sync-public.sh` 的过滤规则（仅 tracked 文件、已自动排除 `.env*`/`dist.pem`/`node_modules`/`paperflow-v*.zip`/`AGENTS.md`/`.agents/` 等所有 gitignored 内容）：
+
+- 排除目录：`.planning/`、`.superpowers/`
+- 文本替换：真实 Supabase project ref → `<ref>` 占位符
+- 安全网：commit 前 grep 校验 leak pattern，命中即 abort
+
+镜像 checkout 在 `.public-mirror/`（gitignored，可随时删，下次 sync 会重 clone）。
+
+如果以后增加新的敏感模式（比如换了真实 ref、加了新 Stripe price ID），改 `scripts/sync-public.sh` 顶部的 `SUPABASE_REF` / `LEAK_PATTERNS` 即可。
 
 ## Architecture (archived prototype, `docs/prototype/`)
 

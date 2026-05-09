@@ -340,6 +340,10 @@ email_optional = false
 enabled = true
 client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
 secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+# Local-stack only: GoTrue rejects /authorize with "missing redirect URI" when
+# this field is empty, even though API_EXTERNAL_URL is set. Hosted Supabase
+# injects this automatically — local stack does not.
+redirect_uri = "http://127.0.0.1:54321/auth/v1/callback"
 # chrome.identity.launchWebAuthFlow strips the nonce from the callback
 # fragment; without this flag Supabase rejects the OIDC response. Safe for
 # Chrome-extension-origin flows (chrome.identity enforces its own

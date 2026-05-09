@@ -145,6 +145,41 @@ npm run typecheck      # tsc --noEmit
 
 完整的开发指南见 [`CLAUDE.md`](CLAUDE.md)。
 
+## 📦 打包发版（给非开发者使用）
+
+要把扩展发给非开发者（对方没有本地 Supabase、没有 Node 环境），打一个**纯生产版 zip**，让他们用 *Load unpacked* 安装。PaperFlow 没上 Chrome Web Store，这是当前的标准分发方式。
+
+```bash
+cd chrome-extension
+
+# 1. 升版本号（同步 manifest.json + package.json，提交并打 tag v{version}）
+npm run bump patch              # 或：minor | major | 1.2.3
+
+# 2. 构建生产 bundle 并打包
+npm run release                 # → chrome-extension/paperflow-v{version}.zip
+
+# 3. 推送 commit 和 tag
+git push && git push --tags
+```
+
+`npm run release`（`scripts/release.sh`）做的事：
+
+- 强制 `rm -rf dist` + `npm run build`（生产模式 → 线上 Supabase）。**绝不会把 dev 构建打包出去。**
+- 如果在 `dist/assets/` 里发现本地 Supabase URL `127.0.0.1:54321`，直接退出（防止误把 `build:dev` 的产物打进去）。
+- `manifest.json` 与 `package.json` 版本号不一致 → 退出。
+- 把 `dist/` 打成 `paperflow-v{version}.zip`，放在 `chrome-extension/` 根目录。
+
+zip 已经 gitignored，**不要把 artifact 提交进 git**。挂到 GitHub Release（绑到 `v{version}` tag 上）、内网共享、或公司云盘都可以。
+
+### 发给同事的安装步骤
+
+1. 解压 `paperflow-v{version}.zip` 到一个稳定目录
+2. 打开 `chrome://extensions/`，右上角打开 **开发者模式**
+3. 点击 **加载已解压的扩展程序 / Load unpacked**，选择解压后的文件夹
+4. 访问任意 [`arxiv.org/abs/...`](https://arxiv.org/) 页面
+
+Chrome 启动时会有一条黄色 "disable developer mode extensions" 警告 —— 这是非 Web Store 安装的正常提示，关掉即可。
+
 ## 📂 项目结构
 
 ```
