@@ -41,12 +41,14 @@ test.describe('Options page · BYOK Configs', () => {
     // ── Functional: open new-config form ──────────────────────────────
     await newConfigBtn.click();
 
-    // Preset dropdown — quick task 260507 reduces this to the single
-    // 'openai-compatible' option (local-litellm removed).
+    // Preset dropdown — Slice 1 #8 adds 'openai-codex' alongside the
+    // 'openai-compatible' entry left over from quick task 260507.
     const presetSelect = page.locator('select').filter({ has: page.locator('option[value="openai-compatible"]') });
     await expect(presetSelect).toBeVisible();
-    const optionTexts = await presetSelect.locator('option').allTextContents();
-    expect(optionTexts.length).toBe(1);
+    const optionValues = await presetSelect.locator('option').evaluateAll(
+      (els) => els.map((e) => (e as HTMLOptionElement).value).sort(),
+    );
+    expect(optionValues).toEqual(['openai-codex', 'openai-compatible']);
 
     // The legacy v1.1 form is wrapped in a collapsed <details> below the new
     // form — its inputs are hidden but still in DOM. Scope to the new form via

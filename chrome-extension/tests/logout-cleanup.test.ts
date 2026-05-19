@@ -77,6 +77,22 @@ describe('clearLogoutKeys — Phase 15 keys', () => {
   });
 });
 
+describe('clearLogoutKeys — Slice 1 #8 codex auth keys', () => {
+  it('removes codex_auth_tokens (shared-device session leakage prevention)', async () => {
+    vi.resetModules();
+    const { clearLogoutKeys } = await import('../reader/lib/logout-cleanup');
+    await clearLogoutKeys();
+    expect(removeCalls).toContain('codex_auth_tokens');
+  });
+
+  it('removes codex_auth_user (orphaned user identity prevention)', async () => {
+    vi.resetModules();
+    const { clearLogoutKeys } = await import('../reader/lib/logout-cleanup');
+    await clearLogoutKeys();
+    expect(removeCalls).toContain('codex_auth_user');
+  });
+});
+
 describe('clearLogoutKeys — pre-existing Phase 12 keys preserved', () => {
   it('still removes config_apikeys (Phase 12 D-A2)', async () => {
     vi.resetModules();

@@ -25,7 +25,18 @@
 //
 // Pure-data + pure-function module.
 
-export type BYOKPresetId = 'openai-compatible';
+export type BYOKPresetId = 'openai-compatible' | 'openai-codex';
+
+// Slice 1 #8 — sentinel baseURL for the openai-codex preset. ai.ts /
+// storage.ts / overview.ts / options/main.tsx all key on this constant to
+// detect that a BYOK row is a codex-auth config (credentials in OAuth
+// tokens, not user-supplied apiKey). Extracted to a single source of truth
+// per PR #10 review so future renames flip in lockstep.
+export const CODEX_SENTINEL_BASEURL = 'chatgpt://codex';
+
+export function isCodexBaseURL(baseURL: string | null | undefined): boolean {
+  return baseURL === CODEX_SENTINEL_BASEURL;
+}
 
 export interface BYOKPreset {
   id: BYOKPresetId;
@@ -56,6 +67,19 @@ export const BYOK_PRESETS: ReadonlyArray<BYOKPreset> = [
     defaultModel: '',
     apiKeyPlaceholder: '',
     helpText: 'Any OpenAI-compatible endpoint.',
+  },
+  {
+    // Slice 1 #8 — OpenAI Codex (ChatGPT Subscription). Sentinel base_url
+    // `chatgpt://codex` is detected by ai.ts to route through codex-stream
+    // (Slice 2 #9), bypassing the apiKey/baseURL/model fields entirely.
+    // Credentials come from device-flow OAuth handled by codex-auth.ts;
+    // apiKey field is unused (preset UI hides it).
+    id: 'openai-codex',
+    label: 'OpenAI Codex (ChatGPT Subscription)',
+    defaultBaseURL: CODEX_SENTINEL_BASEURL,
+    defaultModel: 'gpt-5.2',
+    apiKeyPlaceholder: '',
+    helpText: 'Sign in with your ChatGPT account. Uses your subscription quota.',
   },
 ];
 

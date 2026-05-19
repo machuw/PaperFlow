@@ -1,5 +1,6 @@
 import type { Paper, PaperMemory, AiActionKind, AiConfig, ChatMessage as StoredChatMessage, Citation, SummarySection } from '../types';
 import { getLocale } from './i18n';
+import { isCodexBaseURL } from './byok-presets';
 
 /**
  * Build the "Paper" markdown block injected into every AI call (§3.7.1).
@@ -804,7 +805,11 @@ export async function callAI(
   // tier downgrades or migration writes take effect on the next callAI.
   const managedId = (await getItem('config_active_managed_model_id')) ?? '';
   const cfg = await getConfig();
-  const route = managedId ? 'managed' : (cfg?.apiKey ? 'byok' : 'proxy');
+  // Slice 2 #9: detect the openai-codex BYOK preset by its sentinel baseURL.
+  // Routed BEFORE the apiKey check because the codex preset has no
+  // user-supplied apiKey (credentials are OAuth-managed by codex-auth).
+  const isCodex = isCodexBaseURL(cfg?.baseURL);
+  const route = managedId ? 'managed' : isCodex ? 'codex' : (cfg?.apiKey ? 'byok' : 'proxy');
   console.info(`[ai] callAI kind=${kind} route=${route}`);
 
   // Quick 260506-8ov: build telemetry hook only for chat turns. Proxy fallback
@@ -845,6 +850,14 @@ export async function callAI(
         model: managedId,
         telemetry: telemetryHook,
       });
+    }
+    if (isCodex) {
+      // Slice 2 #9 — Codex preset: route through codex-stream (sentinel
+      // baseURL='chatgpt://codex'). Auth tokens come from codex-auth, NOT
+      // from cfg.apiKey. Skipped above the apiKey check so an empty apiKey
+      // does not fall through to the managed-proxy fallback.
+      const { streamCodexResponses } = await import('./codex-stream');
+      return await streamCodexResponses(messages, combinedSignal, wrappedOnChunk);
     }
     if (cfg?.apiKey) {
       // Priority 2 — BYOK: local-only credentials. T-15-03-T8: managed branch

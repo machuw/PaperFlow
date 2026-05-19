@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PaperFlow",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "AI-assisted paper reader for arXiv and PDFs.",
   "permissions": [
     "storage",

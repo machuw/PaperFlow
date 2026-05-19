@@ -23,7 +23,7 @@ import {
 import { addToLibrary, updateLibraryRow, removeLibraryEntry, getLibrary } from './lib/library';
 import { loadPaperFromCache } from './lib/load-paper-from-cache';
 import { buildChatMessages, extractCitations, callAI, ProxyError, assertNever } from './lib/ai';
-import { adaptiveServerErrorToast } from './lib/toast-helpers';
+import { adaptiveServerErrorToast, surfaceCodexError } from './lib/toast-helpers';
 import { t } from './lib/i18n';
 import { emptyMemory, DEFAULT_TWEAKS } from './types';
 import type { Paper, PdfRuntime, ReaderVariant, Tweaks, Highlight, TextSelection, MarginResult, ChatMessage, NoteKind, OverviewMeta } from './types';
@@ -1509,6 +1509,13 @@ function ViewerApp({ paper, pdfRuntime }: { paper: Paper; pdfRuntime: PdfRuntime
         return;
       }
       if (err instanceof QuotaError) {
+        setChatMessages((prev) => prev.filter((m) => m.id !== assistantId));
+        await Sessions.removeMessage(pk, sid, assistantId);
+        return;
+      }
+      // Slice 3 #12: codex relogin / api-changed → action toast instead of a
+      // raw status-code message the user can't act on.
+      if (surfaceCodexError(err)) {
         setChatMessages((prev) => prev.filter((m) => m.id !== assistantId));
         await Sessions.removeMessage(pk, sid, assistantId);
         return;

@@ -18,9 +18,18 @@ describe('BYOK_PRESETS', () => {
     vi.unstubAllEnvs();
   });
 
-  it('contains exactly 1 entry — openai-compatible (quick task 260507: local-litellm removed)', async () => {
+  it('contains openai-compatible + openai-codex (Slice 1 #8 adds openai-codex)', async () => {
     const { BYOK_PRESETS } = await import('../reader/lib/byok-presets');
-    expect(BYOK_PRESETS.map((p) => p.id)).toEqual(['openai-compatible']);
+    expect(BYOK_PRESETS.map((p) => p.id).sort()).toEqual(['openai-codex', 'openai-compatible']);
+  });
+
+  it('openai-codex preset uses chatgpt://codex sentinel base_url and gpt-5.2 model (Slice 1 #8)', async () => {
+    const { BYOK_PRESETS } = await import('../reader/lib/byok-presets');
+    const p = BYOK_PRESETS.find((x) => x.id === 'openai-codex');
+    expect(p).toBeDefined();
+    expect(p!.defaultBaseURL).toBe('chatgpt://codex');
+    expect(p!.defaultModel).toBe('gpt-5.2');
+    expect(p!.apiKeyPlaceholder).toBe(''); // OAuth login, no user-supplied apiKey
   });
 
   it('does NOT contain local-litellm (quick task 260507 hard cutover)', async () => {

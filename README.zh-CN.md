@@ -35,8 +35,21 @@
 - 📚 **论文库 + 标注 + 聊天记录** —— 你读过的每一篇论文都在累积成一个个人知识库
 - ☁️ **跨设备同步** —— Supabase Postgres + Realtime 保持库在所有浏览器一致
 - 🔑 **BYOK 或托管 AI** —— 自带 OpenAI 兼容 key，或者用平台托管代理（带用量配额）
+- 💬 **ChatGPT 订阅走 Codex（实验性）** —— Plus / Pro / Team 用户可以直接用自己的 ChatGPT 配额驱动 PaperFlow 的 AI，零 per-token API 费用。请先看下方风险披露。
 - ⌨️ **键盘优先** —— `⌘K` 命令面板 · `⌘\` 大纲 · `⌘L` 论文库
 - 🎨 **暖纸张美学** —— 浅色/深色主题，可调字体、页宽、纸面颗粒、页边距
+
+## ⚠️ ChatGPT Codex preset —— 实验性，风险自担
+
+PaperFlow 提供一个名为 **OpenAI Codex（ChatGPT 订阅）** 的 BYOK preset，让 ChatGPT Plus / Pro / Team 用户可以直接用自己已有的订阅配额驱动 PaperFlow 的 AI 调用。开启之前请清楚自己在选什么：
+
+- **TOS 灰色地带**：OpenAI 的 ChatGPT 服务条款限制对服务的自动化访问。把 PaperFlow 接到你的 ChatGPT 会话上，可能被认定为违规。账号侧执法节奏由 OpenAI 决定，**风险由你承担**。
+- **非公开 API**：Codex 后端（`chatgpt.com/backend-api/codex/responses`）没有公开文档，OpenAI 随时可能改 / 停。PaperFlow **不承诺**长期维护此 preset；OpenAI 一旦收紧此通道，preset 可能直接停摆。
+- **沿用 Codex CLI 的客户端身份**：preset 复用了 Codex CLI 的公开 OAuth `client_id`。PaperFlow 没有注册自己的 client_id（也无法注册），这是目前唯一可行的路径。
+- **凭据**只**存本机**：Codex 的 `access_token` / `refresh_token` 全量存在 `chrome.storage.local`，**永不**同步到 PaperFlow 云端、**永不**离开签发它的设备。登出会清除；多设备需要各自单独登录。
+- **PaperFlow 不收费、无档位 gating**：所有 PaperFlow 用户都可以用此 preset。消耗的是你 ChatGPT 订阅的配额，不是 PaperFlow 的额度。
+
+完整背景：[ADR-0001](docs/adr/0001-codex-byok-via-device-code-flow.md)、[Codex BYOK spec](docs/specs/2026-05-12-spec-codex-subscription-byok.md)。
 
 ## 📦 安装
 

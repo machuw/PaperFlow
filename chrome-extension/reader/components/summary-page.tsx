@@ -12,6 +12,7 @@ import {
 import { getItem } from '../lib/storage-schema';
 import { paperKey } from '../lib/ids';
 import { t, useT } from '../lib/i18n';
+import { surfaceCodexError } from '../lib/toast-helpers';
 
 /**
  * Full-page article-style Markdown summary rendered in the Summary variant.
@@ -87,6 +88,12 @@ function startStream(
     } catch (err) {
       const cur = streams.get(key);
       if (!cur || cur.requestId !== myRequestId) return;
+      // Slice 3 #12: codex-typed errors fire a toast; clear the stream so the
+      // page doesn't render a redundant error banner with the raw status code.
+      if (surfaceCodexError(err)) {
+        streams.delete(key);
+        return;
+      }
       cur.status = 'error';
       if (err instanceof ProxyError) {
         if (err.code === 'QUOTA_EXCEEDED') {

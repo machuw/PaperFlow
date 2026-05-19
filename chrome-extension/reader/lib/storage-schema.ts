@@ -164,6 +164,23 @@ export type StorageSchema = {
   'pf:librariesIntroSeen':      boolean
   'pf:libraryV2Migrated':       boolean
   'pf:lib:pendingDeletes':      PendingDelete[]
+
+  // Codex BYOK Slice 1 (#8). OpenAI Codex (ChatGPT Subscription) OAuth tokens —
+  // LOCAL ONLY per feedback_byok_local_only.md; never synced. Tokens come from
+  // OAuth Device Code Flow against auth.openai.com (Codex CLI client_id).
+  // expires_at is unix ms, computed from the /oauth/token response's expires_in
+  // claim at issue time. token_type is always 'bearer'.
+  codex_auth_tokens: {
+    access_token:  string
+    refresh_token: string
+    id_token?:     string
+    expires_at:    number
+    token_type:    'bearer'
+  } | undefined
+
+  // Cached user identity (decoded from id_token claims at login) for UI
+  // display without re-decoding the JWT per render.
+  codex_auth_user: { email: string } | undefined
 }
 export type StorageKey = keyof StorageSchema
 

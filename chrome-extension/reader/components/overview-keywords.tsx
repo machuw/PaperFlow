@@ -3,6 +3,7 @@ import type { OverviewState } from '../lib/overview';
 import type { Paper } from '../types';
 import { t } from '../lib/i18n';
 import { callAI, buildMessages, rafBatchedAppender } from '../lib/ai';
+import { surfaceCodexError } from '../lib/toast-helpers';
 import { getKeywordExplain, setKeywordExplain } from '../lib/storage';
 import { paperKey } from '../lib/ids';
 
@@ -49,6 +50,12 @@ export function OverviewKeywords({ state, model, paper, locale, onRetry }: Props
       setExplainMap((m) => ({ ...m, [kw]: { kind: 'ready', body: final } }));
       await setKeywordExplain(paperKey(paper), kw, model, locale, final);
     } catch (e: any) {
+      // Slice 3 #12: codex relogin / api-changed errors → toast + clear the
+      // keyword cell so a generic "error" pill doesn't compete with the toast.
+      if (surfaceCodexError(e)) {
+        setExplainMap((m) => { const next = { ...m }; delete next[kw]; return next; });
+        return;
+      }
       setExplainMap((m) => ({ ...m, [kw]: { kind: 'error', message: e?.message ?? 'failed' } }));
     }
   }

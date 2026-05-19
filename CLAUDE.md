@@ -364,3 +364,17 @@ The webhook upserts `subscriptions` on checkout.completed and `cancel_at_period_
 ### Logout semantics
 
 `doLogout` in `components/top-bar.tsx` clears: `config_apikey`, `config_apikeys` (Phase 12 D-A2), `config_active_byok_config_id` (Phase 12 D-D2), `migrationState:byok-configs-v12` (Phase 12 D-A3), `byokHealthCache` (Phase 12 D-C1 — MED-5 cross-AI review), `config_prefs`, `sync:queue`, `migrationState`, `paperIdMap`, `churnModalSeen`, `libraryCapBannerDismissed`, and all `paper:*` keys except `:parsed` and `:summary:*` (regenerable, safe to keep).
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as GitHub issues; use the `gh` CLI (it infers the repo from `git remote -v`, so the same commands work in both the private dev clone and the public mirror). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Canonical five-label vocabulary (`needs-triage` / `needs-info` / `ready-for-agent` / `ready-for-human` / `wontfix`); `wontfix` and `ready-for-agent` already exist, the rest are created on first use. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context — one `CONTEXT.md` + `docs/adr/` at the repo root (created lazily by `/grill-with-docs`). See `docs/agents/domain.md`.

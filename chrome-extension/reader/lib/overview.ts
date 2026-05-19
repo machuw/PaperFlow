@@ -2,6 +2,9 @@ import { getOverviewSection, setOverviewSection } from './storage';
 import { callAI, buildMessages, rafBatchedAppender } from './ai';
 import { supabase } from './supabase';
 import { getConfig } from './storage';
+import { getItem } from './storage-schema';
+import { isCodexBaseURL } from './byok-presets';
+import { surfaceCodexError } from './toast-helpers';
 import type { Paper } from '../types';
 
 export type OverviewSectionKind = 'contributions' | 'keywords';
@@ -30,6 +33,15 @@ async function aiAvailable(): Promise<boolean> {
   // mid-migration.
   const cfg = await getConfig();
   if (cfg && cfg.apiKey && cfg.baseURL && cfg.model) return true;
+  // Slice 2 #9: Codex preset uses sentinel baseURL with an empty apiKey —
+  // credentials come from codex_auth_tokens (OAuth) instead. Recognize it as
+  // configured when both the sentinel and a stored token are present, so the
+  // Overview tab fires summarization instead of showing "未配置 AI" after the
+  // user logs in via the Codex panel.
+  if (cfg && isCodexBaseURL(cfg.baseURL) && cfg.model) {
+    const tokens = await getItem('codex_auth_tokens');
+    if (tokens) return true;
+  }
   const { data: { session } } = await supabase.auth.getSession();
   return !!session;
 }
@@ -63,6 +75,13 @@ export async function ensureOverview(
     await setOverviewSection(pk, kind, model, lang, final);
     onState({ kind: 'ready', body: final });
   } catch (e: any) {
+    // Slice 3 #12: Codex-typed errors get surfaced via toast (relogin /
+    // switch-provider nudge) instead of a generic error banner that the user
+    // can't act on. Toast supersedes; clear streaming state to idle.
+    if (surfaceCodexError(e)) {
+      onState({ kind: 'idle' });
+      return;
+    }
     onState({ kind: 'error', message: e?.message ?? 'failed' });
   }
 }

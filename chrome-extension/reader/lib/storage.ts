@@ -1,5 +1,6 @@
 import type { Paper, PaperMemory, Highlight, AiConfig, MarginResult, ChatMessage, SummarySection, CanvasLayout, ChatSession, Note, OverviewMeta } from '../types';
 import { getItem } from './storage-schema';
+import { isCodexBaseURL } from './byok-presets';
 
 // Cache everything except `memory` (stored separately) and mode-specific fields
 // (id/urlHash — those come from the URL at load time, not storage).
@@ -240,7 +241,12 @@ export async function getConfig(): Promise<AiConfig | null> {
   try {
     const { getActiveBYOKConfig } = await import('./byok-configs');
     const active = await getActiveBYOKConfig();
-    if (active && active.apiKey) {
+    // Slice 2 #9: codex preset's sentinel baseURL is a valid active config
+    // even though apiKey is empty (credentials come from codex-auth OAuth
+    // tokens, not a user-supplied key). All other presets still require
+    // apiKey before they're considered "configured".
+    const isCodex = isCodexBaseURL(active?.base_url);
+    if (active && (active.apiKey || isCodex)) {
       return {
         baseURL: active.base_url ?? '',
         apiKey: active.apiKey,

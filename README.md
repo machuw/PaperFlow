@@ -35,8 +35,21 @@
 - 📚 **Library, annotations & chat history** — every paper you open builds a personal knowledge base
 - ☁️ **Cross-device sync** — Supabase Postgres + Realtime keeps your library consistent across browsers
 - 🔑 **BYOK or managed AI** — bring your own OpenAI-compatible key, or use the managed proxy with usage quotas
+- 💬 **ChatGPT subscription via Codex (experimental)** — Plus/Pro/Team subscribers can drive PaperFlow's AI with their existing ChatGPT quota; no per-token API spend. See the disclosure below.
 - ⌨️ **Keyboard-first** — `⌘K` command palette · `⌘\` outline · `⌘L` library
 - 🎨 **Warm paper aesthetic** — light/dark themes, adjustable typography, page width, grain, and margins
+
+## ⚠️ ChatGPT Codex preset — experimental, use at your own risk
+
+PaperFlow ships a BYOK preset called **OpenAI Codex (ChatGPT Subscription)** that lets ChatGPT Plus / Pro / Team users drive PaperFlow's AI calls with their existing subscription quota. Before you turn it on, understand what you're opting into:
+
+- **TOS gray area.** OpenAI's ChatGPT terms restrict automated programmatic access. Driving PaperFlow with your ChatGPT session may be considered against those terms. Account-level enforcement is at OpenAI's discretion — risk is yours.
+- **Unofficial API surface.** The Codex backend (`chatgpt.com/backend-api/codex/responses`) is undocumented and may change or shut off at any time. PaperFlow does not commit to maintaining this preset if OpenAI tightens the surface.
+- **Reused Codex CLI client identity.** The preset reuses Codex CLI's public OAuth `client_id`. PaperFlow does not register its own client_id (OpenAI does not currently allow third-party registration for the Codex backend); this is the only path that works today.
+- **Tokens are local-only.** Codex `access_token` / `refresh_token` are stored exclusively in `chrome.storage.local`. They are never synced to the PaperFlow cloud and never leave the device they were issued on. Logging out clears them; each device logs in independently.
+- **No PaperFlow cost / no gating.** The preset is free for all PaperFlow tiers. Your usage counts against your ChatGPT subscription's quota, not PaperFlow's.
+
+For full background see [ADR-0001](docs/adr/0001-codex-byok-via-device-code-flow.md) and the [Codex BYOK spec](docs/specs/2026-05-12-spec-codex-subscription-byok.md).
 
 ## 📦 Installation
 

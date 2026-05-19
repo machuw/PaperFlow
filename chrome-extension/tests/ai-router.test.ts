@@ -148,6 +148,46 @@ describe('callAI router — BYOK vs proxy (iron rule)', () => {
   });
 });
 
+describe('callAI router — Slice 2 #9 Codex sentinel routing', () => {
+  it('baseURL=chatgpt://codex → fetch hits chatgpt.com/backend-api/codex/responses, NOT ai-proxy or chat/completions', async () => {
+    const { callAI } = await import('../reader/lib/ai');
+    const { setItem } = await import('../reader/lib/storage-schema');
+
+    await seedActiveBYOKConfig({
+      apiKey: '',                       // codex preset has no user-supplied apiKey
+      baseURL: 'chatgpt://codex',       // sentinel that triggers codex-stream
+      model: 'gpt-5.2',
+    });
+    await setItem('codex_auth_tokens', {
+      access_token: 'router-test-tok',
+      refresh_token: 'r',
+      // PR #10 review hardening introduced a 60s skew margin in
+      // getValidAccessToken — sit well outside it.
+      expires_at: Date.now() + 10 * 60_000,
+      token_type: 'bearer',
+    });
+
+    const fetchSpy = vi
+      .spyOn(global, 'fetch')
+      .mockImplementation(async () => sseDoneResponse());
+
+    const onChunk = vi.fn();
+    try {
+      await callAI([{ role: 'user', content: 'hi' }], 'explain', onChunk);
+    } catch {
+      // ignore stream parse issues — only fetch targets matter here
+    }
+
+    const urls = fetchSpy.mock.calls.map((c) => String(c[0]));
+    // Routed to codex-stream
+    expect(urls.some((u) => u.includes('chatgpt.com/backend-api/codex/responses'))).toBe(true);
+    // Did NOT touch managed proxy
+    expect(urls.some((u) => u.includes('/functions/v1/ai-proxy'))).toBe(false);
+    // Did NOT touch the standard openai-compatible /chat/completions path
+    expect(urls.some((u) => u.endsWith('/chat/completions'))).toBe(false);
+  });
+});
+
 describe('callAI router — Phase 15 D-E2 3-priority routing', () => {
   // Test 1 — managed wins over BYOK (priority 1)
   it('managedId set + valid BYOK apiKey → routes to ai-proxy with body.model', async () => {

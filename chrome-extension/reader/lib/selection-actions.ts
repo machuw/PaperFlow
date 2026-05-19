@@ -2,6 +2,7 @@ import type { Paper, TextSelection, ChatMessage, Note } from '../types';
 import * as Sessions from './chat-sessions';
 import * as Notes from './notes';
 import { callAI, buildMessages } from './ai';
+import { surfaceCodexError } from './toast-helpers';
 import { shouldSyncNote } from './sync-queue';
 
 const inflight = new Map<string, AbortController>();
@@ -97,12 +98,31 @@ async function streamAndPersist(p: StreamParams, sid: string, assistantId: strin
     await Sessions.patchMessage(p.paperKey, sid, assistantId, { text: buf });
     await Notes.patchNote(p.paperKey, actionId, { aiAnswer: buf });
   } catch (err) {
+    // PR #15 review fix: classify the error BEFORE the partial-persist
+    // branch. AbortError preserves partial buffer (user-initiated abort —
+    // keep what they got). Codex errors clear the half-written assistant
+    // message + note instead — the toast tells them what happened, and a
+    // half-written reply with no error indicator would be confusing.
+    if (err instanceof Error && err.name === 'AbortError') {
+      if (buf) {
+        await Sessions.patchMessage(p.paperKey, sid, assistantId, { text: buf });
+        await Notes.patchNote(p.paperKey, actionId, { aiAnswer: buf });
+      }
+      return;
+    }
+    if (surfaceCodexError(err)) {
+      // Mirror main.tsx chat path: remove the assistant placeholder + note
+      // entirely so the toast is the only signal. Otherwise a partial buffer
+      // would sit forever in the chat history with no error context.
+      await Sessions.removeMessage(p.paperKey, sid, assistantId);
+      await Notes.deleteNote(p.paperKey, actionId);
+      return;
+    }
+    // Non-codex / non-abort errors: keep partial buffer (same as legacy
+    // behavior) and rethrow so caller's catch path (if any) handles it.
     if (buf) {
       await Sessions.patchMessage(p.paperKey, sid, assistantId, { text: buf });
       await Notes.patchNote(p.paperKey, actionId, { aiAnswer: buf });
-    }
-    if (err instanceof Error && err.name === 'AbortError') {
-      return;   // user-initiated abort; partial preserved, no caller-visible failure
     }
     throw err;
   } finally {

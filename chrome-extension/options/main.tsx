@@ -20,7 +20,8 @@ import {
   deleteBYOKConfig,
   type BYOKConfigClientView,
 } from '../reader/lib/byok-configs';
-import { BYOK_PRESETS, applyPreset, type BYOKPresetId } from '../reader/lib/byok-presets';
+import { BYOK_PRESETS, applyPreset, isCodexBaseURL, type BYOKPresetId } from '../reader/lib/byok-presets';
+import { CodexLoginPanel } from './codex-login-panel';
 // Phase 16 D-B1 / D-B2 / D-B3: openai-compatible template chip data + pure
 // handler (extracted to its own module for unit testability — see PATTERNS.md
 // Section 7.4 + tests/byok-template-chip.test.ts).
@@ -285,11 +286,19 @@ function OptionsApp() {
     setConfigsErr('');
   };
 
+  // Slice 1 #8: infer the preset from the stored base_url so an existing
+  // openai-codex config re-opens correctly in the edit form. Without this,
+  // every saved row would default to the openai-compatible preset on edit
+  // and the Codex login UI would not show.
+  function inferPreset(baseURL: string): BYOKPresetId {
+    return isCodexBaseURL(baseURL) ? 'openai-codex' : 'openai-compatible';
+  }
+
   const startEditConfig = (c: BYOKConfigClientView) => {
     setEditing({
       id: c.id,
       name: c.name,
-      preset: 'openai-compatible',
+      preset: inferPreset(c.base_url),
       baseURL: c.base_url,
       model: c.model,
       apiKey: c.apiKey,
@@ -299,6 +308,22 @@ function OptionsApp() {
 
   const onPresetChange = (presetId: BYOKPresetId) => {
     if (!editing) return;
+    // Slice 1 #8: openai-codex has FIXED credentials (sentinel baseURL,
+    // pinned model, no apiKey). Switching to or from openai-codex must
+    // overwrite all three fields — fill-empty-only would leave stale
+    // values from the previous preset. Standard fill-empty logic applies
+    // only when neither side touches openai-codex.
+    if (presetId === 'openai-codex' || editing.preset === 'openai-codex') {
+      const preset = BYOK_PRESETS.find((p) => p.id === presetId)!;
+      setEditing({
+        ...editing,
+        preset: presetId,
+        baseURL: preset.defaultBaseURL,
+        model: preset.defaultModel,
+        apiKey: preset.apiKeyPlaceholder,
+      });
+      return;
+    }
     const filled = applyPreset(presetId, {
       baseURL: editing.baseURL,
       model: editing.model,
@@ -341,17 +366,24 @@ function OptionsApp() {
       setConfigsErr(t('options.byok-configs.error.name'));
       return;
     }
-    if (!isValidBaseURL(editing.baseURL)) {
-      setConfigsErr(t('options.byok-configs.error.baseURL'));
-      return;
-    }
-    if (!editing.model.trim()) {
-      setConfigsErr(t('options.byok-configs.error.model'));
-      return;
-    }
-    if (!editing.apiKey.trim()) {
-      setConfigsErr(t('options.byok-configs.error.apiKey'));
-      return;
+    // Slice 1 #8: openai-codex preset has fixed sentinel baseURL, pinned
+    // model, and OAuth-managed credentials. Skip the three user-supplied
+    // field validations — the preset has already filled them with
+    // canonical values via onPresetChange / inferPreset.
+    const isCodex = editing.preset === 'openai-codex';
+    if (!isCodex) {
+      if (!isValidBaseURL(editing.baseURL)) {
+        setConfigsErr(t('options.byok-configs.error.baseURL'));
+        return;
+      }
+      if (!editing.model.trim()) {
+        setConfigsErr(t('options.byok-configs.error.model'));
+        return;
+      }
+      if (!editing.apiKey.trim()) {
+        setConfigsErr(t('options.byok-configs.error.apiKey'));
+        return;
+      }
     }
     // WARN-3: capture editable fields BEFORE the await chain so the
     // post-save .then() handler is racing-immune (`editing` may be set
@@ -773,6 +805,19 @@ function OptionsApp() {
               />
             </Field>
 
+            {/* Slice 1 #8 / Slice 5 #14: openai-codex preset replaces the
+                apiKey/baseURL/model trio + template chips with an OAuth login
+                panel. The preset's sentinel baseURL `chatgpt://codex` is
+                auto-filled by onPresetChange + inferPreset; the user never
+                types it. Wrapped in a Field so the section header reads the
+                same as the apiKey/baseURL/model rows above. */}
+            {editing.preset === 'openai-codex' && (
+              <Field label={t('options.byok-codex.section.label')}>
+                <CodexLoginPanel />
+              </Field>
+            )}
+
+            {editing.preset !== 'openai-codex' && (<>
             {/* Phase 16 D-C1: 6 template chip row, only rendered while editing
                 is non-null (saved configs do NOT render chips). D-C4: flex-wrap
                 so 760px+ is single row, narrower wraps. D-C2: 1s active flash
@@ -860,6 +905,7 @@ function OptionsApp() {
                 style={input()}
               />
             </Field>
+            </>)}
 
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               <button

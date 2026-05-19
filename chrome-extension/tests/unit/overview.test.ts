@@ -119,8 +119,116 @@ describe('ensureOverview', () => {
     expect(callAIMock).not.toHaveBeenCalled();
   });
 
-  it('apiKey set but prefs missing baseURL → unconfigured (would-throw byok-misconfigured otherwise)', async () => {
-    await chrome.storage.local.set({ config_apikey: 'sk-test', config_prefs: { baseURL: '', model: '' } });
+  it('BYOK config with apiKey but missing baseURL/model → unconfigured (would-throw byok-misconfigured otherwise)', async () => {
+    // Phase 17 cutover: legacy split keys (config_apikey + config_prefs) are
+    // gone. Seed via the active multi-config row pattern so the test exercises
+    // the production read path through getActiveBYOKConfig.
+    await chrome.storage.local.set({
+      config_byok_configs: [{
+        id: 'cfg-partial',
+        user_id: '',
+        name: 'Default',
+        base_url: '',
+        model: '',
+        is_active: true,
+        created_at: '2026-05-04T00:00:00.000Z',
+        updated_at: '2026-05-04T00:00:00.000Z',
+      }],
+      config_apikeys: { 'cfg-partial': 'sk-test' },
+      config_active_byok_config_id: 'cfg-partial',
+    });
+    const states: any[] = [];
+    await ensureOverview('P', fakePaper, 'contributions', 'gpt', 'en', (s) => states.push(s));
+    expect(states).toEqual([{ kind: 'unconfigured' }]);
+    expect(callAIMock).not.toHaveBeenCalled();
+  });
+
+  it('Slice 2 #9: Codex preset active + token present → streams (no apiKey, no session)', async () => {
+    // Codex preset stores credentials in codex_auth_tokens, not apiKey. The
+    // active BYOK row carries the sentinel baseURL `chatgpt://codex` with an
+    // empty apiKey. aiAvailable() must treat this combination as configured.
+    await chrome.storage.local.set({
+      config_byok_configs: [{
+        id: 'cfg-codex',
+        user_id: '',
+        name: 'ChatGPT',
+        base_url: 'chatgpt://codex',
+        model: 'gpt-5.2',
+        is_active: true,
+        created_at: '2026-05-18T00:00:00.000Z',
+        updated_at: '2026-05-18T00:00:00.000Z',
+      }],
+      config_apikeys: {},
+      config_active_byok_config_id: 'cfg-codex',
+      codex_auth_tokens: {
+        access_token: 'codex-access',
+        refresh_token: 'codex-refresh',
+        expires_at: Date.now() + 60_000,
+        token_type: 'bearer',
+      },
+    });
+    const states: any[] = [];
+    await ensureOverview('P', fakePaper, 'contributions', 'gpt', 'en', (s) => states.push(s));
+    expect(states.find((s) => s.kind === 'unconfigured')).toBeFalsy();
+    expect(states.find((s) => s.kind === 'ready')).toBeTruthy();
+  });
+
+  it('Slice 3 #12: callAI throws CodexReloginRequiredError → pf-show-toast dispatched, state does NOT go to error', async () => {
+    // Make aiAvailable() return true (any byok path is fine) so the catch
+    // path is reachable.
+    await chrome.storage.local.set({
+      config_byok_configs: [{
+        id: 'cfg-codex',
+        user_id: '',
+        name: 'ChatGPT',
+        base_url: 'chatgpt://codex',
+        model: 'gpt-5.2',
+        is_active: true,
+        created_at: '2026-05-18T00:00:00.000Z',
+        updated_at: '2026-05-18T00:00:00.000Z',
+      }],
+      config_apikeys: {},
+      config_active_byok_config_id: 'cfg-codex',
+      codex_auth_tokens: {
+        access_token: 'a',
+        refresh_token: 'r',
+        expires_at: Date.now() + 60_000,
+        token_type: 'bearer',
+      },
+    });
+    // Force callAI to throw the relogin error mid-stream.
+    const { CodexReloginRequiredError } = await import('../../reader/lib/codex-auth');
+    callAIMock.mockImplementationOnce(async () => { throw new CodexReloginRequiredError(); });
+    const toastEvents: CustomEvent[] = [];
+    window.addEventListener('pf-show-toast', (e) => toastEvents.push(e as CustomEvent));
+
+    const states: any[] = [];
+    await ensureOverview('P', fakePaper, 'contributions', 'gpt', 'en', (s) => states.push(s));
+
+    // The toast fired — UI surfaces the relogin nudge.
+    expect(toastEvents).toHaveLength(1);
+    // The overview did NOT publish a generic error state — toast supersedes it.
+    expect(states.find((s) => s.kind === 'error')).toBeFalsy();
+  });
+
+  it('Slice 2 #9: Codex preset active but no token → unconfigured', async () => {
+    // Sentinel baseURL alone isn't enough — without codex_auth_tokens the
+    // user has logged out (or never logged in). Treat as unconfigured so the
+    // Overview tab nudges them through the Codex login flow.
+    await chrome.storage.local.set({
+      config_byok_configs: [{
+        id: 'cfg-codex',
+        user_id: '',
+        name: 'ChatGPT',
+        base_url: 'chatgpt://codex',
+        model: 'gpt-5.2',
+        is_active: true,
+        created_at: '2026-05-18T00:00:00.000Z',
+        updated_at: '2026-05-18T00:00:00.000Z',
+      }],
+      config_apikeys: {},
+      config_active_byok_config_id: 'cfg-codex',
+    });
     const states: any[] = [];
     await ensureOverview('P', fakePaper, 'contributions', 'gpt', 'en', (s) => states.push(s));
     expect(states).toEqual([{ kind: 'unconfigured' }]);
