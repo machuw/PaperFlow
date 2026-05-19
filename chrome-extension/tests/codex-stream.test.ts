@@ -120,6 +120,65 @@ describe('codex-stream', () => {
     ]);
   });
 
+  it('#22 cycle 6: body.model uses caller-supplied model id when provided', async () => {
+    await chrome.storage.local.set({
+      codex_auth_tokens: {
+        access_token: 'a',
+        refresh_token: 'r',
+        expires_at: Date.now() + 10 * 60_000,
+        token_type: 'bearer',
+      },
+    });
+    fetchMock.mockResolvedValueOnce(
+      new Response('', { status: 200, headers: { 'content-type': 'text/event-stream' } }),
+    );
+
+    const { streamCodexResponses } = await import('../reader/lib/codex-stream');
+    await streamCodexResponses(
+      [{ role: 'user', content: 'hi' }],
+      new AbortController().signal,
+      () => {},
+      'gpt-6-preview',
+    );
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(JSON.parse(init.body as string).model).toBe('gpt-6-preview');
+  });
+
+  it('#22 cycle 6: empty / undefined model falls back to CODEX_DEFAULT_MODEL', async () => {
+    await chrome.storage.local.set({
+      codex_auth_tokens: {
+        access_token: 'a',
+        refresh_token: 'r',
+        expires_at: Date.now() + 10 * 60_000,
+        token_type: 'bearer',
+      },
+    });
+    fetchMock.mockResolvedValue(
+      new Response('', { status: 200, headers: { 'content-type': 'text/event-stream' } }),
+    );
+
+    const { streamCodexResponses } = await import('../reader/lib/codex-stream');
+    const { CODEX_DEFAULT_MODEL } = await import('../reader/lib/byok-presets');
+
+    await streamCodexResponses(
+      [{ role: 'user', content: 'hi' }],
+      new AbortController().signal,
+      () => {},
+      '',
+    );
+    expect(JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string).model)
+      .toBe(CODEX_DEFAULT_MODEL);
+
+    await streamCodexResponses(
+      [{ role: 'user', content: 'hi' }],
+      new AbortController().signal,
+      () => {},
+      // 4th arg omitted
+    );
+    expect(JSON.parse((fetchMock.mock.calls[1][1] as RequestInit).body as string).model)
+      .toBe(CODEX_DEFAULT_MODEL);
+  });
+
   it('system messages are extracted into the instructions field; input contains only user/assistant', async () => {
     await chrome.storage.local.set({
       codex_auth_tokens: {
@@ -220,7 +279,11 @@ describe('codex-stream', () => {
         }),
         { status: 200, headers: { 'content-type': 'application/json' } },
       ))
-      // 3) retried Codex POST → 200 SSE
+      // 3) #22 cycle 5: refresh path opportunistically re-discovers models.
+      //    Returns 500 so the discovery falls back silently — the 401 retry
+      //    is what this test cares about.
+      .mockResolvedValueOnce(new Response('boom', { status: 500 }))
+      // 4) retried Codex POST → 200 SSE
       .mockResolvedValueOnce(new Response(sseStream(), {
         status: 200,
         headers: { 'content-type': 'text/event-stream' },
@@ -235,9 +298,9 @@ describe('codex-stream', () => {
     );
 
     expect(chunks).toEqual(['ok']);
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
     // Retry used the freshly-refreshed access_token.
-    const retryInit = fetchMock.mock.calls[2][1] as RequestInit;
+    const retryInit = fetchMock.mock.calls[3][1] as RequestInit;
     expect((retryInit.headers as Record<string, string>)['Authorization']).toBe(
       'Bearer fresh-access',
     );
@@ -265,7 +328,9 @@ describe('codex-stream', () => {
         }),
         { status: 200, headers: { 'content-type': 'application/json' } },
       ))
-      // 3) retried Codex POST → still 401
+      // 3) #22 cycle 5: refresh-driven model discovery (failure is silent)
+      .mockResolvedValueOnce(new Response('boom', { status: 500 }))
+      // 4) retried Codex POST → still 401
       .mockResolvedValueOnce(new Response('still unauthorized', { status: 401 }));
 
     const { streamCodexResponses } = await import('../reader/lib/codex-stream');
@@ -277,7 +342,7 @@ describe('codex-stream', () => {
         () => {},
       ),
     ).rejects.toBeInstanceOf(CodexReloginRequiredError);
-    expect(fetchMock).toHaveBeenCalledTimes(3); // no 4th attempt
+    expect(fetchMock).toHaveBeenCalledTimes(4); // 1 codex + 1 refresh + 1 discovery + 1 retry
   });
 
   it.each([

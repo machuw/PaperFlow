@@ -181,6 +181,12 @@ export type StorageSchema = {
   // Cached user identity (decoded from id_token claims at login) for UI
   // display without re-decoding the JWT per render.
   codex_auth_user: { email: string } | undefined
+
+  // #22 / ADR-0002 — the live set of Codex models this ChatGPT account has
+  // access to. LOCAL ONLY, same lifecycle as codex_auth_tokens: refreshed on
+  // login + token-refresh, cleared on logout. UI reads it to populate the
+  // BYOK MODEL <select>. Never persisted past auth — never synced.
+  codex_available_models: string[] | undefined
 }
 export type StorageKey = keyof StorageSchema
 

@@ -22,6 +22,7 @@ import {
 } from '../reader/lib/byok-configs';
 import { BYOK_PRESETS, applyPreset, isCodexBaseURL, type BYOKPresetId } from '../reader/lib/byok-presets';
 import { CodexLoginPanel } from './codex-login-panel';
+import { CodexModelPicker } from './codex-model-picker';
 // Phase 16 D-B1 / D-B2 / D-B3: openai-compatible template chip data + pure
 // handler (extracted to its own module for unit testability — see PATTERNS.md
 // Section 7.4 + tests/byok-template-chip.test.ts).
@@ -812,9 +813,18 @@ function OptionsApp() {
                 types it. Wrapped in a Field so the section header reads the
                 same as the apiKey/baseURL/model rows above. */}
             {editing.preset === 'openai-codex' && (
-              <Field label={t('options.byok-codex.section.label')}>
-                <CodexLoginPanel />
-              </Field>
+              <>
+                <Field label={t('options.byok-codex.section.label')}>
+                  <CodexLoginPanel />
+                </Field>
+                {/* Slice 2 #24 / ADR-0002: MODEL <select> populated from
+                    codex_available_models. Hides itself until the user has
+                    logged in and the discovery fetch has populated the list. */}
+                <CodexModelPicker
+                  value={editing.model}
+                  onChange={(m) => setEditing({ ...editing, model: m })}
+                />
+              </>
             )}
 
             {editing.preset !== 'openai-codex' && (<>

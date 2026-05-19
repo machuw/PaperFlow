@@ -32,6 +32,13 @@ describe('BYOK_PRESETS', () => {
     expect(p!.apiKeyPlaceholder).toBe(''); // OAuth login, no user-supplied apiKey
   });
 
+  it('exports CODEX_DEFAULT_MODEL constant equal to the preset default (#22)', async () => {
+    const { BYOK_PRESETS, CODEX_DEFAULT_MODEL } = await import('../reader/lib/byok-presets');
+    expect(CODEX_DEFAULT_MODEL).toBe('gpt-5.2');
+    const p = BYOK_PRESETS.find((x) => x.id === 'openai-codex');
+    expect(p!.defaultModel).toBe(CODEX_DEFAULT_MODEL);
+  });
+
   it('does NOT contain local-litellm (quick task 260507 hard cutover)', async () => {
     const { BYOK_PRESETS } = await import('../reader/lib/byok-presets');
     expect(BYOK_PRESETS.find((x) => x.id === ('local-litellm' as never))).toBeUndefined();

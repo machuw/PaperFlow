@@ -91,6 +91,13 @@ describe('clearLogoutKeys — Slice 1 #8 codex auth keys', () => {
     await clearLogoutKeys();
     expect(removeCalls).toContain('codex_auth_user');
   });
+
+  it('#22 cycle 8: removes codex_available_models (auth-lifecycle cleanup per ADR-0002)', async () => {
+    vi.resetModules();
+    const { clearLogoutKeys } = await import('../reader/lib/logout-cleanup');
+    await clearLogoutKeys();
+    expect(removeCalls).toContain('codex_available_models');
+  });
 });
 
 describe('clearLogoutKeys — pre-existing Phase 12 keys preserved', () => {

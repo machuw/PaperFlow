@@ -38,6 +38,12 @@ export function isCodexBaseURL(baseURL: string | null | undefined): boolean {
   return baseURL === CODEX_SENTINEL_BASEURL;
 }
 
+// #22 / ADR-0002 — fallback Codex model id used when the live
+// /codex/models discovery fetch is unavailable (network error, 4xx, or first
+// boot pre-login). Single source of truth so future bumps flip in lockstep
+// across byok-presets / codex-stream / mismatch reset paths.
+export const CODEX_DEFAULT_MODEL = 'gpt-5.2';
+
 export interface BYOKPreset {
   id: BYOKPresetId;
   label: string;
@@ -77,7 +83,7 @@ export const BYOK_PRESETS: ReadonlyArray<BYOKPreset> = [
     id: 'openai-codex',
     label: 'OpenAI Codex (ChatGPT Subscription)',
     defaultBaseURL: CODEX_SENTINEL_BASEURL,
-    defaultModel: 'gpt-5.2',
+    defaultModel: CODEX_DEFAULT_MODEL,
     apiKeyPlaceholder: '',
     helpText: 'Sign in with your ChatGPT account. Uses your subscription quota.',
   },

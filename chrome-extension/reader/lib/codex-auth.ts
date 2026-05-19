@@ -4,12 +4,15 @@
 // PRD #7 / Slice 1 #8.
 
 import { getItem, removeItem, setItem } from './storage-schema';
+import { CODEX_DEFAULT_MODEL } from './byok-presets';
 
 const CODEX_OAUTH_TOKEN_URL = 'https://auth.openai.com/oauth/token';
 const CODEX_DEVICE_AUTH_USERCODE_URL = 'https://auth.openai.com/api/accounts/deviceauth/usercode';
 const CODEX_DEVICE_AUTH_TOKEN_URL = 'https://auth.openai.com/api/accounts/deviceauth/token';
 const CODEX_DEVICE_AUTH_PAGE_URL = 'https://auth.openai.com/codex/device';
 const CODEX_DEVICE_REDIRECT_URI = 'https://auth.openai.com/deviceauth/callback';
+const CODEX_MODELS_URL =
+  'https://chatgpt.com/backend-api/codex/models?client_version=0.42.0';
 // Codex CLI's OAuth client_id — the only viable identity per Phase 0 spike
 // (OpenAI does not allow third-party registration). See PRD #7.
 const CODEX_OAUTH_CLIENT_ID = 'app_EMoamEEZ73f0CkXaXp7hrann';
@@ -58,6 +61,12 @@ export async function getValidAccessToken(opts: { forceRefresh?: boolean } = {})
     token_type:    'bearer' as const,
   };
   await setItem('codex_auth_tokens', newTokens);
+  // ADR-0002: refresh is the natural pulse-check moment to re-discover the
+  // model list. Fire-and-forget on this path so a slow /codex/models RTT does
+  // not lengthen the 401 self-heal in codex-stream (which already awaits the
+  // refresh response to get back to its retry POST). The discovery has no
+  // ordering dependency on the AI call — only the picker UI consumes it.
+  void refreshAvailableModels(newTokens.access_token);
   return newTokens.access_token;
 }
 
@@ -163,6 +172,47 @@ export async function loginPoll(args: LoginPollArgs, signal?: AbortSignal): Prom
       await setItem('codex_auth_user', { email: payload.email });
     }
   }
+  // ADR-0002: discover the live model list and cache it. Discovery failures
+  // must NOT fail login — fall back to [CODEX_DEFAULT_MODEL] so the UI still
+  // has a usable model id.
+  await refreshAvailableModels(body.access_token);
+}
+
+// Fetch + persist the available-models list, swallowing errors with a
+// [CODEX_DEFAULT_MODEL] fallback per ADR-0002. Called opportunistically after
+// login (loginPoll) and after refresh (getValidAccessToken — fire-and-forget).
+// PR #26 re-review LOW: the whole body is wrapped in try/catch — `setItem`
+// can reject (storage quota, extension context invalidated mid-refresh) and
+// the void'd refresh caller has no surrounding catch to swallow that.
+//
+// Slice 3 #25: after persisting, call reconcileActiveCodexModel so a stale
+// stored cfg.model (model removed by OpenAI / tier downgrade) is auto-reset
+// and the user sees a one-shot "switched to X" toast. Reconcile is itself
+// best-effort; failures don't poison the discovery write.
+async function refreshAvailableModels(accessToken: string): Promise<void> {
+  try {
+    let models: string[];
+    try {
+      models = await fetchCodexModels(accessToken);
+      if (models.length === 0) models = [CODEX_DEFAULT_MODEL];
+    } catch {
+      models = [CODEX_DEFAULT_MODEL];
+    }
+    await setItem('codex_available_models', models);
+    // Late import breaks a real module-init cycle:
+    //   codex-auth → codex-model-reconcile → toast-helpers → codex-auth
+    // (toast-helpers re-imports `CodexReloginRequiredError` from this file.)
+    // A static import here would evaluate toast-helpers before
+    // CodexReloginRequiredError is exported, leaving toast-helpers'
+    // binding `undefined` and breaking `surfaceCodexError`'s instanceof
+    // check at runtime. Do NOT inline this import. The module loader
+    // caches the result after the first call so the runtime cost is one
+    // microtask per refresh, not per call.
+    const { reconcileActiveCodexModel } = await import('./codex-model-reconcile');
+    await reconcileActiveCodexModel(models);
+  } catch {
+    // Best-effort discovery — never throw out of this function.
+  }
 }
 
 // Sleep that aborts cleanly if the AbortSignal fires mid-wait. Used by the
@@ -204,7 +254,32 @@ export async function getCurrentUser(): Promise<{ email: string } | null> {
   return (await getItem('codex_auth_user')) ?? null;
 }
 
+// Discover the set of model ids this ChatGPT subscription has access to.
+// Called opportunistically after token exchange / refresh (see ADR-0002) so
+// the BYOK MODEL picker always reflects the live tier — never hardcoded.
+export async function fetchCodexModels(accessToken: string): Promise<string[]> {
+  const resp = await fetch(CODEX_MODELS_URL, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'OpenAI-Beta':   'responses=experimental',
+    },
+  });
+  if (!resp.ok) throw new Error(`codex-auth: fetchCodexModels failed (${resp.status})`);
+  const body = await resp.json();
+  // Defensive: only keep entries that actually carry a string id. If OpenAI
+  // ever returns a malformed row (null entry, {name:...} without id, etc.)
+  // we must NOT leak `undefined` into `codex_available_models` — the UI
+  // <select> would render an "undefined" option and the body.model wire
+  // value would round-trip as the literal string "undefined".
+  return (body?.data ?? []).flatMap((m: unknown) =>
+    m && typeof (m as { id?: unknown }).id === 'string'
+      ? [(m as { id: string }).id]
+      : [],
+  );
+}
+
 export async function logout(): Promise<void> {
   await removeItem('codex_auth_tokens');
   await removeItem('codex_auth_user');
+  await removeItem('codex_available_models');
 }

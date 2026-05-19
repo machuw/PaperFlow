@@ -5,6 +5,7 @@
 // 401 self-heal. Interface mirrors streamBYOK so ai.ts can swap by sentinel.
 
 import { getValidAccessToken, CodexReloginRequiredError } from './codex-auth';
+import { CODEX_DEFAULT_MODEL } from './byok-presets';
 import type { ChatMessage } from './ai';
 
 const CODEX_RESPONSES_URL =
@@ -37,6 +38,7 @@ export async function streamCodexResponses(
   messages: ChatMessage[],
   signal: AbortSignal,
   onChunk: (chunk: string) => void,
+  model?: string,
 ): Promise<void> {
   // Codex Responses API takes the system prompt as a top-level `instructions`
   // field (not as a `role: 'system'` entry inside `input`). Concatenate any
@@ -47,7 +49,9 @@ export async function streamCodexResponses(
     .join('\n\n');
   const input = messages.filter((m) => m.role !== 'system');
   const body = JSON.stringify({
-    model:        'gpt-5.2',
+    // ADR-0002: caller (ai.ts) supplies cfg.model; fall back to the constant
+    // so an empty cfg.model never sends `model: ""` and 400s OpenAI.
+    model:        model || CODEX_DEFAULT_MODEL,
     instructions: instructions || 'You are a helpful assistant.',
     input,
     store:        false,

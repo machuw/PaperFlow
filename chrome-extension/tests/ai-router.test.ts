@@ -186,6 +186,40 @@ describe('callAI router — Slice 2 #9 Codex sentinel routing', () => {
     // Did NOT touch the standard openai-compatible /chat/completions path
     expect(urls.some((u) => u.endsWith('/chat/completions'))).toBe(false);
   });
+
+  it('#22 cycle 7: codex /responses body.model reflects cfg.model (not hardcoded)', async () => {
+    const { callAI } = await import('../reader/lib/ai');
+    const { setItem } = await import('../reader/lib/storage-schema');
+
+    await seedActiveBYOKConfig({
+      apiKey: '',
+      baseURL: 'chatgpt://codex',
+      model: 'gpt-6-preview',   // a value distinct from CODEX_DEFAULT_MODEL
+    });
+    await setItem('codex_auth_tokens', {
+      access_token: 'tok',
+      refresh_token: 'r',
+      expires_at: Date.now() + 10 * 60_000,
+      token_type: 'bearer',
+    });
+
+    const fetchSpy = vi
+      .spyOn(global, 'fetch')
+      .mockImplementation(async () => sseDoneResponse());
+
+    try {
+      await callAI([{ role: 'user', content: 'hi' }], 'explain', vi.fn());
+    } catch {
+      // body inspection is the only behavior under test
+    }
+
+    const codexCall = fetchSpy.mock.calls.find((c) =>
+      String(c[0]).includes('chatgpt.com/backend-api/codex/responses'),
+    );
+    expect(codexCall).toBeDefined();
+    const body = JSON.parse((codexCall![1] as RequestInit).body as string);
+    expect(body.model).toBe('gpt-6-preview');
+  });
 });
 
 describe('callAI router — Phase 15 D-E2 3-priority routing', () => {

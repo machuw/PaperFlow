@@ -857,7 +857,10 @@ export async function callAI(
       // from cfg.apiKey. Skipped above the apiKey check so an empty apiKey
       // does not fall through to the managed-proxy fallback.
       const { streamCodexResponses } = await import('./codex-stream');
-      return await streamCodexResponses(messages, combinedSignal, wrappedOnChunk);
+      // #22 / ADR-0002: pass cfg.model through so the user-picked Codex
+      // model id reaches OpenAI; streamCodexResponses falls back to
+      // CODEX_DEFAULT_MODEL when cfg.model is missing.
+      return await streamCodexResponses(messages, combinedSignal, wrappedOnChunk, cfg?.model);
     }
     if (cfg?.apiKey) {
       // Priority 2 — BYOK: local-only credentials. T-15-03-T8: managed branch

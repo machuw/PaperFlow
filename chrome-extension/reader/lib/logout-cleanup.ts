@@ -33,6 +33,7 @@ import { removeItem } from './storage-schema';
 export async function clearLogoutKeys(): Promise<void> {
   await removeItem('codex_auth_tokens');                  // Slice 1 #8: OAuth tokens for Codex BYOK preset
   await removeItem('codex_auth_user');                    // Slice 1 #8: cached ChatGPT user identity (orphan prevention)
+  await removeItem('codex_available_models');             // #22 / ADR-0002: cached Codex model list (auth-lifecycle binding)
   await removeItem('config_apikeys');                     // Phase 12 D-A2: multi-config apiKey map
   await removeItem('config_byok_configs');                // Phase 12 R1: local-only BYOK config rows (per user feedback feedback_byok_local_only.md)
   await removeItem('config_active_byok_config_id');       // Phase 12 D-D2: cached active config id

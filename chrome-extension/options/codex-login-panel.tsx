@@ -10,7 +10,7 @@
 // in storage-schema.ts). This panel never touches the BYOK config's
 // apiKey field — Codex auth is global, separate from any BYOK row.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   CodexReloginRequiredError,
   loginPoll,
@@ -177,7 +177,8 @@ export function CodexLoginPanel() {
           >
             {loginInFlight.userCode}
           </div>
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <CopyButton userCode={loginInFlight.userCode} />
             <button
               onClick={loginInFlight.cancel}
               style={{
@@ -214,6 +215,66 @@ export function CodexLoginPanel() {
 
       {showOnboarding && <OnboardingModal onDismiss={() => setShowOnboarding(false)} />}
     </div>
+  );
+}
+
+// Slice 4 #23 — Copy button for the user_code chip. Writes the code to the
+// clipboard, flips the label to a 2-second "Copied!" confirmation (or "Copy
+// failed" on rejection), then reverts. The setTimeout is cleared on unmount
+// so a fast cancel cannot land a setState on an unmounted component.
+function CopyButton({ userCode }: { userCode: string }) {
+  type Status = 'idle' | 'copied' | 'failed';
+  const [status, setStatus] = useState<Status>('idle');
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  const onClick = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    // PR #27 review fix: not an `async () =>` handler. The writeText call is
+    // issued synchronously from the click event so the user-gesture
+    // activation transient cannot be dropped across an `await` boundary in
+    // hardened Chromium profiles.
+    navigator.clipboard.writeText(userCode).then(
+      () => { setStatus('copied'); },
+      () => { setStatus('failed'); },
+    ).finally(() => {
+      timerRef.current = setTimeout(() => setStatus('idle'), 2000);
+    });
+  };
+
+  const idleLabel = t('options.byok-codex.login.copy');
+  const label =
+    status === 'copied' ? t('options.byok-codex.login.copied')
+    : status === 'failed' ? t('options.byok-codex.login.copyFailed')
+    : idleLabel;
+
+  return (
+    <button
+      onClick={onClick}
+      // PR #27 review fix: keep the accessible name stable as the affordance
+      // ("Copy") even while the visible label flips to the transient
+      // confirmation — otherwise a screen reader re-scanning the button
+      // would hear "Copied!" as the action it is about to take.
+      aria-label={idleLabel}
+      // Announce label changes to screen readers without stealing focus.
+      aria-live="polite"
+      style={{
+        padding: '4px 12px',
+        fontSize: 12,
+        background: 'transparent',
+        color: 'var(--ink)',
+        border: '0.5px solid var(--rule)',
+        borderRadius: 4,
+        cursor: 'pointer',
+      }}
+    >
+      {label}
+    </button>
   );
 }
 
