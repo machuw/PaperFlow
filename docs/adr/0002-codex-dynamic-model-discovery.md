@@ -34,7 +34,7 @@ Spec §12.2 Q4 pre-spike 时假想过一条 fallback 偏好链（`gpt-5-codex` �
    - **不** Options 页打开时再调（无意义 thrash）
    - **不** 维护 TTL（订阅模型权限对 ChatGPT 账号是稳定的，refresh 链路顺带刷新足够）
 3. **存储**：新增 typed key `codex_available_models: string[]`，存 `chrome.storage.local`，归属于 codex auth 命名空间（跟 `codex_auth_tokens` / `codex_auth_user` 一起；logout 时一起清）
-4. **Fetch 失败兜底**：写入 `[CODEX_DEFAULT_MODEL]`（常量 = `'gpt-5.2'`，spike 实测可用）。AI 调用永远不因 model 发现失败而 fail
+4. **Fetch 失败兜底**：写入 `[CODEX_DEFAULT_MODEL]`（常量 = `'gpt-5.2'`，是「经验证的关键事实」§5 里 `minimal_client_version=0.0.1` 的兼容性兜底；即使我们 bump `CODEX_CLIENT_VERSION` 太激进，gpt-5.2 也几乎总在响应里）。AI 调用永远不因 model 发现失败而 fail
 5. **默认值**：
    - 首次登录 → `availableModels[0]`（让 OpenAI 自己决定排序）
    - v0.2.0 升级用户 → `cfg.model` 不动（已经是 `'gpt-5.2'`，继续用）
@@ -87,9 +87,30 @@ gpt-5-codex → gpt-5 → gpt-5-thinking-high → gpt-4o → availableModels[0]
 ## 经验证的关键事实
 
 1. **`/codex/models` 端点存在且响应正常**（Phase 0 spike Round 2 验证）
-2. **当前订阅返回值只有 `gpt-5.2` 一项**（spike 实测；spec §15.5 记录）
-3. **`access_token` TTL 10 天**（ADR-0001 §15.2）— refresh 频率天然低，搭便车 fetch model list 的总开销可以忽略
-4. **OpenAI 的 model 排序在 response 里是有意义的**（Codex CLI 的实现也是直接取第一项作为默认，不做客户端排序）
+2. **`access_token` TTL 10 天**（ADR-0001 §15.2）— refresh 频率天然低，搭便车 fetch model list 的总开销可以忽略
+3. **OpenAI 的 model 排序在 response 里是有意义的**（Codex CLI 的实现也是直接取第一项作为默认，不做客户端排序）
+4. **响应 shape 是 `{ models: [{ slug, display_name, … }] }`**（v0.2.2 post-ship 重新验证；源码：`openai/codex` 的 `codex-rs/protocol/src/openai_models.rs` 的 `ModelsResponse` + `ModelInfo` 结构）
+5. **服务器按 `client_version` 查询参数过滤模型列表**（v0.2.3 post-ship 验证）：每个模型在 `openai/codex` 的 `codex-rs/models-manager/models.json` 里都标 `minimal_client_version`，服务器对客户端版本低于该值的模型隐藏。例如 gpt-5.5 需要 ≥0.124.0、gpt-5.4 系列需要 ≥0.98.0、gpt-5.2 是 0.0.1。**扩展声称的 `client_version` 决定可见模型数量**，所以这个版本号是个需要长期维护的常量（实现：`CODEX_CLIENT_VERSION` 在 `byok-presets.ts`）
+
+## 已废弃的「事实」
+
+> **「当前订阅返回值只有 `gpt-5.2` 一项」**（v0.2.1 ADR 原文）
+
+这其实是 spike artifact：Phase 0 spike 当时装作 `client_version=0.42.0` 的客户端去打 `/codex/models`，服务器按 §5 的规则筛掉了所有 `minimal_client_version > 0.42` 的模型，回了 1 个 → spike 误读成「endpoint 本身就只有 gpt-5.2」。基于这条「事实」，v0.2.1 ADR 选了「fetch 失败兜底常量 = `gpt-5.2`」并隐含「正常路径也大概率只有 1 项」的假设。
+
+post-ship v0.2.2 修了 parser shape（`body.data[].id` → `body.models[].slug`），但响应依然只有 1 项；v0.2.3 才发现是 `client_version` 在筛 —— bump 到 `0.132.0` 后用户看到全 5 个模型。
+
+### 教训
+
+**遇到「服务器按某客户端字段过滤响应」的接口时，spike 必须显式记下「我们装作了什么版本/身份」并 cross-check 至少一个不同的值，再下「事实」结论**。否则会把 spike 时的客户端假身份当作 endpoint 本质属性写进 ADR，被后续假设（fallback 列表大小、UI 是否必须支持多项、是否需要 model 选择 UI）反复使用，直到 post-ship 才被真实 ChatGPT 账号打脸。具体到本 PRD 的失误链：
+
+1. Spike 用 `client_version=0.42.0` 探测 → 服务器返回 1 项
+2. ADR 写成「endpoint 只有 gpt-5.2」事实
+3. parser 抄成 `body.data[].id`（错的 shape）也没被发现，因为正确 shape 下也只有 1 项，fallback 兜底了
+4. v0.2.1 发版后用户对比 CLI 显示的 5 项才暴露问题
+5. v0.2.2 修 parser 仍然 1 项 → v0.2.3 终于挖到 `client_version` gate
+
+下次类似接口的 spike checklist 应当至少包含「换两个不同 client_version / device_id / locale 重打一次，对比响应差异」。
 
 ## 实现拓扑
 
