@@ -257,6 +257,15 @@ export async function getCurrentUser(): Promise<{ email: string } | null> {
 // Discover the set of model ids this ChatGPT subscription has access to.
 // Called opportunistically after token exchange / refresh (see ADR-0002) so
 // the BYOK MODEL picker always reflects the live tier — never hardcoded.
+//
+// Response shape verified against openai/codex source
+// (codex-rs/codex-api/src/endpoint/models.rs + protocol/src/openai_models.rs):
+//   { "models": [{ "slug": "<id>", "display_name": "...", ... }] }
+// `slug` is the wire identifier the responses endpoint expects in `body.model`.
+// v0.2.1 read `body.data[].id` (mistakenly mirroring the OpenAI public API
+// shape) and silently fell back to [CODEX_DEFAULT_MODEL] for every user.
+// Legacy `id` is also accepted so the parser tolerates the public-API shape
+// if the same code is ever pointed at api.openai.com.
 export async function fetchCodexModels(accessToken: string): Promise<string[]> {
   const resp = await fetch(CODEX_MODELS_URL, {
     headers: {
@@ -266,16 +275,18 @@ export async function fetchCodexModels(accessToken: string): Promise<string[]> {
   });
   if (!resp.ok) throw new Error(`codex-auth: fetchCodexModels failed (${resp.status})`);
   const body = await resp.json();
-  // Defensive: only keep entries that actually carry a string id. If OpenAI
-  // ever returns a malformed row (null entry, {name:...} without id, etc.)
-  // we must NOT leak `undefined` into `codex_available_models` — the UI
-  // <select> would render an "undefined" option and the body.model wire
-  // value would round-trip as the literal string "undefined".
-  return (body?.data ?? []).flatMap((m: unknown) =>
-    m && typeof (m as { id?: unknown }).id === 'string'
-      ? [(m as { id: string }).id]
-      : [],
-  );
+  const rows = (body?.models ?? body?.data ?? []) as unknown[];
+  // Defensive: only keep entries with a string slug (or legacy id). Drop
+  // anything malformed so no `undefined` slips into codex_available_models
+  // and round-trips as the literal "undefined" wire value.
+  return rows.flatMap((m: unknown) => {
+    if (!m || typeof m !== 'object') return [];
+    const slug = (m as { slug?: unknown }).slug;
+    const id = (m as { id?: unknown }).id;
+    if (typeof slug === 'string') return [slug];
+    if (typeof id === 'string') return [id];
+    return [];
+  });
 }
 
 export async function logout(): Promise<void> {

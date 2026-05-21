@@ -524,6 +524,30 @@ describe('codex-auth', () => {
       await expect(fetchCodexModels('any-token')).rejects.toThrow();
     });
 
+    it('v0.2.2 hotfix: parses the real Codex API shape — body.models with .slug per OpenAI Codex CLI', async () => {
+      // Verified against openai/codex source: codex-rs/codex-api/src/endpoint/
+      // models.rs returns ModelsResponse { models: Vec<ModelInfo> }, where each
+      // ModelInfo carries `slug` (not `id`). v0.2.1 read `body.data` + `m.id`
+      // and silently fell back to [CODEX_DEFAULT_MODEL] for every user.
+      fetchMock.mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            models: [
+              { slug: 'gpt-5.5',       display_name: 'GPT-5.5',       description: 'Frontier' },
+              { slug: 'gpt-5.4',       display_name: 'GPT-5.4',       description: 'Everyday' },
+              { slug: 'gpt-5.4-mini',  display_name: 'GPT-5.4 mini',  description: 'Simple' },
+              { slug: 'gpt-5.3-codex', display_name: 'GPT-5.3 codex', description: 'Coding' },
+              { slug: 'gpt-5.2',       display_name: 'GPT-5.2',       description: 'Long' },
+            ],
+          }),
+          { status: 200 },
+        ),
+      );
+      const { fetchCodexModels } = await import('../reader/lib/codex-auth');
+      const models = await fetchCodexModels('tok');
+      expect(models).toEqual(['gpt-5.5', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.3-codex', 'gpt-5.2']);
+    });
+
     it('PR #26 review fix: drops malformed entries (null, missing id, non-string id)', async () => {
       // Defensive guard against an unexpected /codex/models payload shape —
       // ensures no `undefined` slips into codex_available_models and round-
