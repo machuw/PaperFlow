@@ -44,6 +44,16 @@ export function isCodexBaseURL(baseURL: string | null | undefined): boolean {
 // across byok-presets / codex-stream / mismatch reset paths.
 export const CODEX_DEFAULT_MODEL = 'gpt-5.2';
 
+// v0.2.3 hotfix — Codex CLI version we impersonate in the `client_version`
+// query param on /codex/models and /codex/responses. The server filters its
+// returned model list by `minimal_client_version` per model (verified against
+// openai/codex source: codex-rs/models-manager/models.json). Claiming 0.42.0
+// (the original spike value) only unlocked gpt-5.2; bumping to the current
+// stable CLI version unlocks the full set the user's subscription has access
+// to. Re-bump alongside extension releases whenever OpenAI ships a newer CLI
+// with a higher minimal_client_version on new models.
+export const CODEX_CLIENT_VERSION = '0.132.0';
+
 export interface BYOKPreset {
   id: BYOKPresetId;
   label: string;

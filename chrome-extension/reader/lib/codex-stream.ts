@@ -5,11 +5,11 @@
 // 401 self-heal. Interface mirrors streamBYOK so ai.ts can swap by sentinel.
 
 import { getValidAccessToken, CodexReloginRequiredError } from './codex-auth';
-import { CODEX_DEFAULT_MODEL } from './byok-presets';
+import { CODEX_DEFAULT_MODEL, CODEX_CLIENT_VERSION } from './byok-presets';
 import type { ChatMessage } from './ai';
 
 const CODEX_RESPONSES_URL =
-  'https://chatgpt.com/backend-api/codex/responses?client_version=0.42.0';
+  `https://chatgpt.com/backend-api/codex/responses?client_version=${CODEX_CLIENT_VERSION}`;
 
 // Slice 3 #12: thrown when Codex returns a non-401 non-2xx — either OpenAI
 // changed the API surface (404 model gone, 400 schema change) or the user's

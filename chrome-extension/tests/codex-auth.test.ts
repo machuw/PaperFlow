@@ -504,7 +504,12 @@ describe('codex-auth', () => {
       expect(fetchMock).toHaveBeenCalledTimes(1);
       const [url, init] = fetchMock.mock.calls[0];
       expect(String(url)).toContain('chatgpt.com/backend-api/codex/models');
-      expect(String(url)).toContain('client_version=0.42.0');
+      // v0.2.3 — server filters returned models by `client_version` per the
+      // openai/codex `minimal_client_version` schema. Pin the assertion to
+      // the shared constant rather than a literal so future bumps stay in
+      // lockstep across codex-auth + codex-stream + tests.
+      const { CODEX_CLIENT_VERSION } = await import('../reader/lib/byok-presets');
+      expect(String(url)).toContain(`client_version=${CODEX_CLIENT_VERSION}`);
       const headers = (init as RequestInit).headers as Record<string, string>;
       expect(headers['Authorization']).toBe('Bearer tracer-access-token');
       expect(headers['OpenAI-Beta']).toBe('responses=experimental');

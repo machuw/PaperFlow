@@ -4,7 +4,7 @@
 // PRD #7 / Slice 1 #8.
 
 import { getItem, removeItem, setItem } from './storage-schema';
-import { CODEX_DEFAULT_MODEL } from './byok-presets';
+import { CODEX_DEFAULT_MODEL, CODEX_CLIENT_VERSION } from './byok-presets';
 
 const CODEX_OAUTH_TOKEN_URL = 'https://auth.openai.com/oauth/token';
 const CODEX_DEVICE_AUTH_USERCODE_URL = 'https://auth.openai.com/api/accounts/deviceauth/usercode';
@@ -12,7 +12,7 @@ const CODEX_DEVICE_AUTH_TOKEN_URL = 'https://auth.openai.com/api/accounts/device
 const CODEX_DEVICE_AUTH_PAGE_URL = 'https://auth.openai.com/codex/device';
 const CODEX_DEVICE_REDIRECT_URI = 'https://auth.openai.com/deviceauth/callback';
 const CODEX_MODELS_URL =
-  'https://chatgpt.com/backend-api/codex/models?client_version=0.42.0';
+  `https://chatgpt.com/backend-api/codex/models?client_version=${CODEX_CLIENT_VERSION}`;
 // Codex CLI's OAuth client_id — the only viable identity per Phase 0 spike
 // (OpenAI does not allow third-party registration). See PRD #7.
 const CODEX_OAUTH_CLIENT_ID = 'app_EMoamEEZ73f0CkXaXp7hrann';

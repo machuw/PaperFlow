@@ -76,7 +76,8 @@ describe('codex-stream', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toContain('chatgpt.com/backend-api/codex/responses');
-    expect(url).toContain('client_version=0.42.0');
+    const { CODEX_CLIENT_VERSION } = await import('../reader/lib/byok-presets');
+    expect(url).toContain(`client_version=${CODEX_CLIENT_VERSION}`);
     expect((init as RequestInit).method).toBe('POST');
     const headers = (init as RequestInit).headers as Record<string, string>;
     expect(headers['Authorization']).toBe('Bearer tracer-access');
